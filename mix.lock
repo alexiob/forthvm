@@ -1,0 +1,6 @@
+%{
+  "aja": {:hex, :aja, "0.5.3", "c58c2be9e7c3a02291ea722d5e2fae81521aa25e70e383c87f4cef1e51882234", [:mix], [{:jason, "~> 1.2", [hex: :jason, repo: "hexpm", optional: true]}], "hexpm", "308e15478479dbfa4e91054dfb6823e1fd55abff376c571e1ffcf93368b38a68"},
+  "arrays": {:hex, :arrays, "2.0.1", "702c26ebae739ea671b5c377bdf46aacb6aaad348ca0c4baa89d7d005b727fb5", [:mix], [{:extractable, "~> 0.2", [hex: :extractable, repo: "hexpm", optional: false]}, {:fun_land, "~> 0.10.0", [hex: :fun_land, repo: "hexpm", optional: true]}, {:insertable, "~> 0.2", [hex: :insertable, repo: "hexpm", optional: false]}], "hexpm", "402d1c5ba503e2a8d49c68f79071ee964a71fe2c36d5c936787239516ace845f"},
+  "extractable": {:hex, :extractable, "0.2.1", "cf32f0cf2328c073505be285fedecbc984a4f5fec300370dc9c6125bf4d99975", [:mix], [], "hexpm", "42532209510e365c3c9a56c33a2b5448ab1645c0ae124f261162f2c166061019"},
+  "insertable": {:hex, :insertable, "0.2.0", "f9ef5e484d1cc0756f1d248a54466aa6388142a81df18f588158e3eda2501395", [:mix], [], "hexpm", "518a8b5870344c784dec4560a296e3ef539cd08e58df7f425485bb6158ab70d6"},
+}
