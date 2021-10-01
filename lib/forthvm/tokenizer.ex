@@ -1,6 +1,5 @@
 defmodule ForthVM.Tokenizer do
   @comment "#"
-  # @halt_token {:command, {}, :halt}
 
   def parse(source, source_id) when is_binary(source) do
     source
@@ -9,16 +8,13 @@ defmodule ForthVM.Tokenizer do
   end
 
   def parse(source, source_id) when is_list(source) do
-    # IO.inspect(source, label: ">>> PARSE.LIST(#{source_id})")
     source
     |> Enum.with_index()
     |> Enum.map(fn {line_source, idx} -> parse_line(line_source, idx, source_id) end)
     |> List.flatten()
-    # |> Enum.concat([@halt_token])
   end
 
   def parse_line(source, line_idx, source_id) when is_binary(source) do
-    # IO.inspect(source, label: ">>> PARSE_LINE(#{source_id}:#{line_idx})")
     source
     |> split_line
     |> Enum.with_index()

@@ -35,11 +35,11 @@ defmodule ForthVM.Process do
   end
 
   def load(process = %__MODULE__{dictionary: dictionary}, tokens) do
-    debug_inspect(process, tokens, ">>> Process.tokens}")
+    debug_inspect(process, tokens, ">>> Process.load.tokens")
 
     pc = PC.new(dictionary[@word_init])
 
-    %{process | last_word_name: @word_init, pc: pc, tokens: tokens}
+    %{process | last_word_name: @word_init, pc: pc, tokens: tokens, status: :exec}
   end
 
   def next_token(process = %__MODULE__{tokens: [] }) do
@@ -71,18 +71,15 @@ defmodule ForthVM.Process do
   end
 
   def push(process = %__MODULE__{stack: stack}, value) do
-    # debug_inspect(process, stack, ">>> STACK.push = #{inspect(value)}")
-
     %{process | stack: Stack.push(stack, value)}
   end
 
   def pop(process = %__MODULE__{stack: stack}) do
     try do
       {value, stack} = Stack.pop(stack)
-      # debug_inspect(process, stack, ">>> STACK.pop = #{inspect(value)}")
 
       {%{process | stack: stack}, value}
-      rescue
+    rescue
       error ->
          IO.inspect(stack)
          reraise error, __STACKTRACE__
@@ -91,8 +88,6 @@ defmodule ForthVM.Process do
   end
 
   def r_push(process = %__MODULE__{return_stack: stack}, value) do
-    # debug_inspect(process, stack, ">>> RETURN_STACK.push = #{inspect(value)}")
-
     %{process | return_stack: Stack.push(stack, value)}
   end
 
@@ -101,9 +96,6 @@ defmodule ForthVM.Process do
       0 -> {process, nil}
       _ ->
         {value, stack} = Stack.pop(stack)
-
-        # debug_inspect(process, stack, ">>> RETURN_STACK.pop = #{inspect(value)}")
-
         {%{process | return_stack: stack }, value}
     end
   end
@@ -139,12 +131,14 @@ defmodule ForthVM.Process do
     padding = 16
     IO.puts("<------------------------------ TRACE ------------------------------------")
     IO.inspect(value, label: String.pad_trailing("< word", padding), limit: :infinity)
+    IO.inspect(process.status, label: String.pad_trailing("< status", padding), limit: :infinity)
     IO.inspect(process.last_word_name, label: String.pad_trailing("< last_word_name", padding), limit: :infinity)
     IO.inspect(process.return_stack, label: String.pad_trailing("< return_stack", padding), limit: :infinity)
     IO.inspect(process.pc, label: String.pad_trailing("< pc", padding), limit: :infinity)
     IO.inspect(process.pc && process.pc.idx, label: String.pad_trailing("< pc.idx", padding), limit: :infinity)
     IO.inspect(process.stack, label: String.pad_trailing("< stack", padding), limit: :infinity)
     IO.inspect(Map.get(process.dictionary, "forth_interpreter_flag", false), label: String.pad_trailing("< forth_interpret", padding), limit: :infinity)
+    IO.inspect(process.dictionary, label: String.pad_trailing("< dictionary", padding), limit: :infinity)
     IO.puts("<-------------------------------------------------------------------------")
 
     process

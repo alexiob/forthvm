@@ -45,8 +45,6 @@ defmodule ForthVM.Interpreter do
   def process_token(process = %Process{pc: pc}) do
     {pc, token} = PC.next(pc)
 
-    # IO.inspect(token, label: "! process_token.token")
-
     process_token(%{process | pc: pc}, token)
   end
 
@@ -59,47 +57,26 @@ defmodule ForthVM.Interpreter do
   end
 
   def process_token(process = %Process{}, {:string, _meta, value}) do
-    # IO.inspect(process.stack, label: ">>> process_token.pre")
-    # IO.puts(">>> process_token(:string, #{value})")
-
-    process = process_word(process, value)
-
-    # IO.inspect(process.stack, label: ">>> process_token.post")
-
-    {:exec, process, value}
+    {:exec, process_word(process, value), value}
   end
 
   def process_token(process = %Process{}, {:integer, _meta, value}) do
-    # IO.inspect(process.stack, label: ">>> process_token.integer")
-    # IO.puts(">>> process_token(:integer, #{value})")
-
     {:exec, Process.push(process, value), value}
   end
 
   def process_token(process = %Process{}, {:float, _meta, value}) do
-    # IO.inspect(process.stack, label: ">>> process_token.float")
-    # IO.puts(">>> process_token(:float, #{value})")
-
     {:exec, Process.push(process, value), value}
   end
 
   def process_token(process, name) when is_binary(name) do
-    # IO.puts(">>> process_token.name: #{name}")
-
-    process = process_word(process, name)
-
-    {:exec, process, name}
+    {:exec, process_word(process, name), name}
   end
 
   def process_token(process, token) do
-    # IO.puts(">>> process_token.unknown")
-    # IO.inspect(token)
-
     {:exec, process, token}
   end
 
   def process_word(process = %Process{dictionary: dictionary}, name) do
-    # IO.inspect(name, label: "! process_word")
     case Map.get(dictionary, name) do
       # not a word, push into the stack
       nil -> Process.push(process, name)

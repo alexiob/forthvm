@@ -40,6 +40,5 @@ defmodule ForthVM.InterpreterTest do
     output = capture_io(fn -> Interpreter.interpret(process, 200) end)
 
     assert output == "*** Hello wonderful world! ***\n"
-    # IO.inspect(process)
   end
 end
