@@ -3,11 +3,14 @@
 Very simple Forth VM/Interpreter written in Elixir
 
 - [x] tokenizer
-- [x] process
+- [ ] process
 - [x] interpreter
 - [x] core words
-- [ ] REPL
+- [x] loops
+- [x] if-then
+- [ ] include
 - [ ] labels for branches, instead of relative values
+- [ ] REPL
 - [ ] sleep word
 - [ ] VM
 - [ ] multiple processes running in a single VM

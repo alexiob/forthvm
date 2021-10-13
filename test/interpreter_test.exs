@@ -7,38 +7,38 @@ defmodule ForthVM.InterpreterTest do
 
   test "interpreter should work" do
     source = """
-    # 100 5 7 +
-    # 10 20 >=
+    # "start" debug-process-trace
+    # debug-disable
 
-    # debug-enable
+    (
+      this
+      is
+      a
+      multiline
+      comment
+    )
+    include "./test/fixtures/hello-world"
 
-    : hello-world
-    # first comment
-    "*** Hello wonderful world! ***" puts # this is an inline comment
-    "step"
-    # second comment
-    ;
-
+    ( this is a another comment )
     # 'hello-world' debug-word-dump
 
     # "1" debug-process-trace
     # debug-enable
-    hello-world
+
+    # ::repeat
+    #   hello-world
+    #   branch :repeat
+
     # debug-disable
 
     # "2" debug-process-trace
-    # hello-world
+    hello-world
 
     # "3" debug-process-trace
     # hello-world
 
-
-    # "final" debug-process-trace
+    "final" debug-process-trace
     """
 
-    process = Process.new() |> Process.set_debug(false) |> Process.load(source, :main)
-    output = capture_io(fn -> Interpreter.interpret(process, 200) end)
-
-    assert output == "*** Hello wonderful world! ***\n"
   end
 end

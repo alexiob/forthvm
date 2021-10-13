@@ -1,64 +1,98 @@
 defmodule ForthVM.Words.Stack do
-  alias ForthVM.Process
-  alias ForthVM.Stack
+  alias ForthVM.Core
 
-  #=============================
-  # stack manipulation
-  #=============================
+  import ForthVM.Core.Utils
 
-  def dup(process=%Process{stack: stack}) do
-    value = Stack.get(stack, 0)
+  #---------------------------------------------
+  # Stack operations
+  #---------------------------------------------
 
-    Process.debug_puts(process, ">>> dup: value=#{inspect(value)}")
-
-    process = Process.push(process, value)
-
-    Process.debug_inspect(process, process.stack, ">>> dup.stack")
+  @doc"""
+  depth: ( -- x ) get stack depth
+  """
+  def depth(tokens, data_stack, return_stack, dictionary, meta) do
+    Core.next(tokens, [length(data_stack) | data_stack], return_stack, dictionary, meta)
   end
 
-  def drop(process=%Process{}) do
-    {process, _} = Process.pop(process)
-
-    process
+  @doc"""
+  drop: ( x -- ) remove element from top of stack
+  """
+  def drop(tokens, [_ | data_stack], return_stack, dictionary, meta) do
+    Core.next(tokens, data_stack, return_stack, dictionary, meta)
   end
 
-  def swap(process=%Process{}) do
-    {process, b} = Process.pop(process)
-    {process, a} = Process.pop(process)
-
-    process
-    |> Process.push(b)
-    |> Process.push(a)
+  @doc"""
+  2drop: ( x y -- ) remove two elements from top of stack
+  """
+  def drop2(tokens, [_, _ | data_stack], return_stack, dictionary, meta) do
+    Core.next(tokens, data_stack, return_stack, dictionary, meta)
   end
 
-  def over(process=%Process{stack: stack}) do
-    value = Stack.get(stack, 1)
-
-    Process.push(process, value)
+  @doc"""
+  dup: ( x -- x x ) duplicate element from top of stack
+  """
+  def dup(tokens, [x | data_stack], return_stack, dictionary, meta) do
+    Core.next(tokens, [x, x | data_stack], return_stack, dictionary, meta)
   end
 
-  def rot(process=%Process{}) do
-    {process, c} = Process.pop(process)
-    {process, b} = Process.pop(process)
-    {process, a} = Process.pop(process)
-
-    process
-    |> Process.push(b)
-    |> Process.push(c)
-    |> Process.push(a)
+  @doc"""
+  2dup: ( x y -- x y x y ) duplicate two elements from top of stack
+  """
+  def dup2(tokens, [x, y | data_stack], return_stack, dictionary, meta) do
+    Core.next(tokens, [x, y, x, y | data_stack], return_stack, dictionary, meta)
   end
 
-  def depth(process=%Process{stack: stack}) do
-    value = Stack.depth(stack)
-
-    Process.push(process, value)
+  @doc"""
+  ?dup: ( x -- x x ) duplicate element from top of stack if element value is truthly
+  """
+  def dup?(tokens, [x | _] = data_stack, return_stack, dictionary, meta) when is_falsely(x) do
+    Core.next(tokens, data_stack, return_stack, dictionary, meta)
   end
 
-  def pick(process=%Process{stack: stack}) do
-    {process, idx} = Process.pop(process)
-
-    value = Stack.get(stack, idx)
-
-    Process.push(process, value)
+  def dup?(tokens, [x | _] = data_stack, return_stack, dictionary, meta) do
+    Core.next(tokens, [x | data_stack], return_stack, dictionary, meta)
   end
+
+  @doc"""
+  swap: ( x y -- y x ) swap top two elements on top of stack
+  """
+  def swap(tokens, [y, x | data_stack], return_stack, dictionary, meta) do
+    Core.next(tokens, [x, y | data_stack], return_stack, dictionary, meta)
+  end
+
+  @doc"""
+  2swap: ( y2 x2 y1 x1 -- y1 x1 y2 x2 ) swap top copules on top of stack
+  """
+  def swap2(tokens, [x1, y1, x2, y2 | data_stack], return_stack, dictionary, meta) do
+    Core.next(tokens, [x2, y2, x1, y1 | data_stack], return_stack, dictionary, meta)
+  end
+
+  @doc"""
+  over: (y x -- y x y) copy second element on top of stack
+  """
+  def over(tokens, [y, x | data_stack], return_stack, dictionary, meta) do
+    Core.next(tokens, [y, x, y | data_stack], return_stack, dictionary, meta)
+  end
+
+  @doc"""
+  2over: ( y2 x2 y1 x1 -- y2 x2 y1 x1 y2 x2) swap top copules on top of stack
+  """
+  def over2(tokens, [x1, y1, x2, y2 | data_stack], return_stack, dictionary, meta) do
+    Core.next(tokens, [x2, y2, x1, y1, x2, y2 | data_stack], return_stack, dictionary, meta)
+  end
+
+  @doc"""
+  rot: ( x y z -- y z x ) rotate the top three stack entries, bottom goes on top
+  """
+  def rot(tokens, [z, y, x | data_stack], return_stack, dictionary, meta) do
+    Core.next(tokens, [x, z, y | data_stack], return_stack, dictionary, meta)
+  end
+
+  @doc"""
+  -rot: ( x y z -- z x y ) rotate the top three stack entries, top goes on bottom
+  """
+  def rot_neg(tokens, [z, y, x | data_stack], return_stack, dictionary, meta) do
+    Core.next(tokens, [y, x, z | data_stack], return_stack, dictionary, meta)
+  end
+
 end
