@@ -6,9 +6,7 @@ defmodule ForthVM.TokenizerTest do
   test "Tokenizer should work" do
     source = """
     : hello-world
-    # first comment
-    "hello world" 42 4.2 print # this is an inline comment
-    # second comment
+    "hello world" 42 4.2 print
     ;
 
     hello-world

@@ -66,7 +66,7 @@ defmodule ForthVM.Core.Dictionary do
       true -> word_name
     end
 
-    IO.puts(">>> CAPTURING: #{function}:#{arity} -> name=#{word_name} stack=#{word_stack} doc=#{word_doc}")
+    # IO.puts(">>> CAPTURING: #{function}:#{arity} -> name=#{word_name} stack=#{word_stack} doc=#{word_doc}")
     add(dictionary, word_name, Function.capture(module, function, arity), %{stack: word_stack, doc: word_doc})
   end
   def register_module_word_from_doc(_module, doc, dictionary) do

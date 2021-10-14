@@ -33,10 +33,28 @@ defmodule ForthVM.Words.IO do
   end
 
   @doc"""
-  dot: ( x -- ) pops and prints the literal value on the top of the data_stack
+  .: ( x -- ) pops and prints the literal value on the top of the data_stack
   """
   def dot(tokens, [x | data_stack], return_stack, dictionary, %{io: %{device: device}} = meta) do
-    IO.write(device, "#{x} ")
+    IO.write(device, "#{x}")
+
+    Core.next(tokens, data_stack, return_stack, dictionary, meta)
+  end
+
+  @doc"""
+  puts: ( x -- ) pops and prints the literal value on the top of the data_stack
+  """
+  def puts(tokens, [x | data_stack], return_stack, dictionary, %{io: %{device: device}} = meta) do
+    IO.puts(device, x)
+
+    Core.next(tokens, data_stack, return_stack, dictionary, meta)
+  end
+
+  @doc"""
+  inspect: ( x -- ) pops and prints the inspected value on the top of the data_stack
+  """
+  def inspect(tokens, [x | data_stack], return_stack, dictionary, %{io: %{device: device}} = meta) do
+    IO.inspect(device, x, limit: :infinity)
 
     Core.next(tokens, data_stack, return_stack, dictionary, meta)
   end

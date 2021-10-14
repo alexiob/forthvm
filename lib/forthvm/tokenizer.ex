@@ -1,6 +1,4 @@
 defmodule ForthVM.Tokenizer do
-  @comment "#"
-
   @doc """
   Parse a text source
   """
@@ -56,15 +54,6 @@ defmodule ForthVM.Tokenizer do
       token -> {:cont, [token | acc]}
     end
   end
-
-  # handle comments, ignoring them
-  def tokenize_word(@comment) do
-    {:skip}
-  end
-
-  # def tokenize_word({":" <> name = label, word_idx}, line_idx, source_id) when is_binary(name) and name != "" do
-  #   label
-  # end
 
   # handle core types represented as strings
   def tokenize_word("true") do
@@ -122,7 +111,6 @@ defmodule ForthVM.Tokenizer do
 
     %{tokens: tokens, labels: labels} = Enum.reduce(tokens, acc, &collect_labels(&1, &2))
 
-    # IO.inspect(labels, label: ">>> LABELS")
     tokens
     |> List.flatten()
     |> Enum.reverse()

@@ -3,6 +3,7 @@ defmodule ForthVM.Words.Interpreter do
 
   alias ForthVM.Core
   alias ForthVM.Core.Dictionary
+  alias ForthVM.Tokenizer
 
   #---------------------------------------------
   # Process exit conditions
@@ -42,7 +43,20 @@ defmodule ForthVM.Words.Interpreter do
   #---------------------------------------------
 
   @doc"""
-  ":": ( -- ) convert all tokens till ";" is fount into a new word
+  "(": ( -- ) discard all tokens till ")" is fountd
+  """
+  def comment(tokens, data_stack, return_stack, dictionary, meta) do
+    {_comment_tokens, [")" | tokens]} = Enum.split_while(tokens, fn s -> s != ")" end)
+
+    Core.next(tokens, data_stack, return_stack, dictionary, meta)
+  end
+
+  #---------------------------------------------
+  # Word definition
+  #---------------------------------------------
+
+  @doc"""
+  ":": ( -- ) convert all tokens till ";" is found into a new word
   """
   def create([word_name | tokens], data_stack, return_stack, dictionary, meta) do
     {word_tokens, [";" | tokens]} = Enum.split_while(tokens, fn s -> s != ";" end)
@@ -113,5 +127,20 @@ defmodule ForthVM.Words.Interpreter do
     end
 
     Core.next(tokens, data_stack, return_stack, dictionary, meta)
+  end
+
+  @doc"""
+  include: ( -- ) include program file from filename specified in next token.
+  """
+  def include([filename | tokens], data_stack, return_stack, dictionary, meta) do
+    include_tokens = case File.read(filename) do
+      {:ok, source} -> Tokenizer.parse(source)
+      # FIXME: should raise an error
+      {:error, error} ->
+        IO.inspect(error, label: ">>> INCLUDE #{filename} ERROR:")
+        []
+    end
+
+    Core.next(include_tokens ++ tokens, data_stack, return_stack, dictionary, meta)
   end
 end

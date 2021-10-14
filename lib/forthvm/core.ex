@@ -23,7 +23,7 @@ defmodule ForthVM.Core do
   #---------------------------------------------
 
   # run program described by tokens, using the provided dictionary, for, at max, number of reductions
-  def run(tokens, dictionary, reductions) do
+  def run(tokens, dictionary = %{}, reductions) do
     process(tokens, [], [], dictionary, %{new_meta() | reductions: reductions})
   end
 
@@ -269,11 +269,21 @@ defmodule ForthVM.Core do
   # end
 
   #---------------------------------------------
+  # Literal values
+  #---------------------------------------------
+
+  def process([value | tokens ], data_stack, return_stack, dictionary, meta) when not is_binary(value) do
+    next(tokens, [value | data_stack], return_stack, dictionary, meta)
+
+  end
+
+  #---------------------------------------------
   # Dictionary handler
   #---------------------------------------------
 
   def process([word_name | tokens ], data_stack, return_stack, dictionary, meta) when is_binary(word_name) do
-    {tokens, data_stack, return_stack, dictionary, meta} = case get_dictionary_word(dictionary, word_name) do
+    # process word
+    result = case get_dictionary_word(dictionary, word_name) do
       # function: execute function
       {:word, function, _} when is_function(function) -> function.(tokens, data_stack, return_stack, dictionary, meta)
       # tokens: add tokens at beginning of current tokens
@@ -288,7 +298,11 @@ defmodule ForthVM.Core do
       invalid -> raise "invalid word definition: #{inspect(invalid, limit: :infinity)}"
     end
 
-    next(tokens, data_stack, return_stack, dictionary, meta)
+    # handle responses
+    case result do
+      {tokens, data_stack, return_stack, dictionary, meta} -> next(tokens, data_stack, return_stack, dictionary, meta)
+      result -> result
+    end
   end
 
 
