@@ -7,12 +7,24 @@ defmodule ForthVM.CoreWordsMathTest do
     assert {:exit, _, 42} = core_run("20 22 +")
   end
 
+  test "+ float" do
+    assert {:exit, _, 42.5} = core_run("20.5 22 +")
+  end
+
   test "-" do
     assert {:exit, _, -2} = core_run("20 22 -")
   end
 
+  test "- float" do
+    assert {:exit, _, -2.5} = core_run("20 22.5 -")
+  end
+
   test "*" do
     assert {:exit, _, 20} = core_run("4 5 *")
+  end
+
+  test "* float" do
+    assert {:exit, _, 22.8} = core_run("4 5.7 *")
   end
 
   test "/" do

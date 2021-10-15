@@ -70,7 +70,7 @@ defmodule ForthVM.Words.Stack do
   @doc"""
   over: (y x -- y x y) copy second element on top of stack
   """
-  def over(tokens, [y, x | data_stack], return_stack, dictionary, meta) do
+  def over(tokens, [x, y | data_stack], return_stack, dictionary, meta) do
     Core.next(tokens, [y, x, y | data_stack], return_stack, dictionary, meta)
   end
 
