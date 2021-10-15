@@ -24,14 +24,11 @@ defmodule ForthVM.Words.Interpreter do
   end
 
   @doc"""
-  abort": ( flag i * x -- ) ( R: j * x -- ) if flag is truthly empty the data stack and perform the function of QUIT, which includes emptying the return stack, displaying a message.
+  abort?: ( flag i * x -- ) ( R: j * x -- ) if flag is truthly empty the data stack and perform the function of QUIT, which includes emptying the return stack, displaying a message.
   """
-  def abort_msg(tokens, [flag | data_stack], return_stack, dictionary, meta) do
-    {message, ["\"" | tokens]} = Enum.split_while(tokens, fn s -> s != "\"" end)
+  def abort_msg([message | tokens], [flag | data_stack], return_stack, dictionary, meta) do
     if is_truthly(flag) do
-      # FIXME: use VM IO functions
-      message = Enum.join(message, " ")
-      IO.puts(message)
+      IO.puts(meta.io.device, message)
       abort(tokens, data_stack, return_stack, dictionary, meta)
     else
       Core.next(tokens, data_stack, return_stack, dictionary, meta)
@@ -59,13 +56,14 @@ defmodule ForthVM.Words.Interpreter do
   ":": ( -- ) convert all tokens till ";" is found into a new word
   """
   def create([word_name | tokens], data_stack, return_stack, dictionary, meta) do
+    # FIXME: implement `is-interpret` and `immediate`
     {word_tokens, [";" | tokens]} = Enum.split_while(tokens, fn s -> s != ";" end)
 
     Core.next(tokens, data_stack, return_stack, Dictionary.add(dictionary, word_name, word_tokens), meta)
   end
 
   @doc"""
-  variable: ( -- ) create a new variable
+  variable: ( -- ) create a new variable with name from next token
   """
   def variable([word_name | tokens], data_stack, return_stack, dictionary, meta) do
     dictionary = case Map.has_key?(dictionary, word_name) do
@@ -77,7 +75,7 @@ defmodule ForthVM.Words.Interpreter do
   end
 
   @doc"""
-  "!": ( name x -- ) store value in variable
+  "!": ( x name -- ) store value in variable
   """
   def set_variable(tokens, [word_name, x | data_stack], return_stack, dictionary, meta) do
     dictionary = case Map.has_key?(dictionary, word_name) do
@@ -90,7 +88,7 @@ defmodule ForthVM.Words.Interpreter do
   end
 
   @doc"""
-  "+!": ( name x -- ) increment variable by given value
+  "+!": ( x name -- ) increment variable by given value
   """
   def inc_variable(tokens, [word_name, x | data_stack], return_stack, dictionary, meta) do
     dictionary = case Map.has_key?(dictionary, word_name) do
@@ -107,17 +105,18 @@ defmodule ForthVM.Words.Interpreter do
   "@": ( name -- ) get value in variable
   """
   def get_variable(tokens, [word_name | data_stack], return_stack, dictionary, meta) do
-    dictionary = case Map.has_key?(dictionary, word_name) do
+    data_stack = case Map.has_key?(dictionary, word_name) do
       # FIXME: should raise an error
-      false -> dictionary
-      true -> Dictionary.get_var(dictionary, word_name)
+      false -> [nil | data_stack]
+      true -> [Dictionary.get_var(dictionary, word_name) | data_stack]
     end
+
 
     Core.next(tokens, data_stack, return_stack, dictionary, meta)
   end
 
   @doc"""
-  constant: ( x -- ) create a new costant
+  constant: ( x -- ) create a new costant with name from next token and value from data stack
   """
   def constant([word_name | tokens], [x | data_stack], return_stack, dictionary, meta) do
     dictionary = case Map.has_key?(dictionary, word_name) do
