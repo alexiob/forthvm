@@ -6,7 +6,14 @@ defmodule ForthVM.Core.Utils do
   defguard is_falsely(value) when value == false or value == nil or value == 0 or value == ""
   defguard is_truthly(value) when not is_falsely(value)
 
-  # #---------------------------------------------
+  #---------------------------------------------
+  # Error handling
+  #---------------------------------------------
+
+  def error(message, context) do
+    {:error, context, message}
+  end
+
   #---------------------------------------------
   # Stack utilities
   #---------------------------------------------

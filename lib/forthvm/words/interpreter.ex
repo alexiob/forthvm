@@ -36,6 +36,18 @@ defmodule ForthVM.Words.Interpreter do
   end
 
   #---------------------------------------------
+  # Sleep
+  #---------------------------------------------
+
+  @doc"""
+  sleep: ( x -- ) sleep for given milliseconds
+  """
+  def sleep(tokens, [ms | data_stack], return_stack, dictionary, meta) do
+    till = System.monotonic_time() + System.convert_time_unit(ms, :millisecond, :native)
+    Core.next(tokens, data_stack, return_stack, dictionary, %{meta | sleep: till})
+  end
+
+  #---------------------------------------------
   # Word definition
   #---------------------------------------------
 
@@ -78,68 +90,95 @@ defmodule ForthVM.Words.Interpreter do
   "!": ( x name -- ) store value in variable
   """
   def set_variable(tokens, [word_name, x | data_stack], return_stack, dictionary, meta) do
-    dictionary = case Map.has_key?(dictionary, word_name) do
-      # FIXME: should raise an error
-      false -> dictionary
-      true -> Dictionary.set_var(dictionary, word_name, x)
+    case Map.has_key?(dictionary, word_name) do
+      false -> error(
+        "can not set unknown variable '#{word_name}' with value '#{inspect(x)}'",
+        {tokens, data_stack, return_stack, dictionary, meta}
+      )
+      true -> Core.next(
+        tokens,
+        data_stack,
+        return_stack,
+        Dictionary.set_var(dictionary, word_name, x),
+        meta
+      )
     end
-
-    Core.next(tokens, data_stack, return_stack, dictionary, meta)
   end
 
   @doc"""
   "+!": ( x name -- ) increment variable by given value
   """
   def inc_variable(tokens, [word_name, x | data_stack], return_stack, dictionary, meta) do
-    dictionary = case Map.has_key?(dictionary, word_name) do
-      # FIXME: should raise an error
-      false -> dictionary
+    case Map.has_key?(dictionary, word_name) do
+      false -> error(
+        "can not increment unknown variable '#{word_name}' by '#{inspect(x)}'",
+        {tokens, data_stack, return_stack, dictionary, meta}
+      )
       # FIXME: should handle :undefined ?
-      true -> Dictionary.set_var(dictionary, word_name, Dictionary.get_var(dictionary, word_name) + x)
+      true -> Core.next(
+        tokens,
+        data_stack,
+        return_stack,
+        Dictionary.set_var(dictionary, word_name, Dictionary.get_var(dictionary, word_name) + x),
+        meta
+      )
     end
-
-    Core.next(tokens, data_stack, return_stack, dictionary, meta)
   end
 
   @doc"""
   "@": ( name -- ) get value in variable
   """
   def get_variable(tokens, [word_name | data_stack], return_stack, dictionary, meta) do
-    data_stack = case Map.has_key?(dictionary, word_name) do
-      # FIXME: should raise an error
-      false -> [nil | data_stack]
-      true -> [Dictionary.get_var(dictionary, word_name) | data_stack]
+    case Map.has_key?(dictionary, word_name) do
+      false -> error(
+        "can not fetch unknown variable '#{word_name}'",
+        {tokens, data_stack, return_stack, dictionary, meta}
+      )
+      true -> Core.next(
+        tokens,
+        [Dictionary.get_var(dictionary, word_name) | data_stack],
+        return_stack,
+        dictionary,
+        meta
+      )
     end
-
-
-    Core.next(tokens, data_stack, return_stack, dictionary, meta)
   end
 
   @doc"""
   constant: ( x -- ) create a new costant with name from next token and value from data stack
   """
   def constant([word_name | tokens], [x | data_stack], return_stack, dictionary, meta) do
-    dictionary = case Map.has_key?(dictionary, word_name) do
-      # FIXME: should raise an error
-      true -> dictionary
-      false -> Dictionary.add_const(dictionary, word_name, x)
+    case Map.has_key?(dictionary, word_name) do
+      true -> error(
+        "can not set already defined constant '#{word_name}' with new value '#{inspect(x)}'",
+        {tokens, data_stack, return_stack, dictionary, meta}
+      )
+      false -> Core.next(
+        tokens,
+        data_stack,
+        return_stack,
+        Dictionary.add_const(dictionary, word_name, x),
+        meta
+      )
     end
-
-    Core.next(tokens, data_stack, return_stack, dictionary, meta)
   end
 
   @doc"""
   include: ( -- ) include program file from filename specified in next token.
   """
   def include([filename | tokens], data_stack, return_stack, dictionary, meta) do
-    include_tokens = case File.read(filename) do
-      {:ok, source} -> Tokenizer.parse(source)
-      # FIXME: should raise an error
-      {:error, error} ->
-        IO.inspect(error, label: ">>> INCLUDE #{filename} ERROR:")
-        []
+    case File.read(filename) do
+      {:ok, source} -> Core.next(
+        Tokenizer.parse(source) ++ tokens,
+        data_stack,
+        return_stack,
+        dictionary,
+        meta
+      )
+      {:error, file_error} -> error(
+        "can not include '#{filename}' because '#{inspect(file_error)}'",
+        {tokens, data_stack, return_stack, dictionary, meta}
+      )
     end
-
-    Core.next(include_tokens ++ tokens, data_stack, return_stack, dictionary, meta)
   end
 end

@@ -8,6 +8,7 @@ defmodule ForthVM.Core do
   def new_meta() do
     %{
       reductions: 0,
+      sleep: 0,
       debug: false,
       io: %{
         device: :stdio,
@@ -41,6 +42,15 @@ defmodule ForthVM.Core do
   """
   def next(tokens, data_stack, return_stack, dictionary, meta)
 
+  # process is sleeping
+  def next(tokens, data_stack, return_stack, dictionary, %{sleep: till} = meta) when till != 0 do
+    if System.monotonic_time() < till do
+      {:yield, {tokens, data_stack, return_stack, dictionary, meta}, nil}
+    else
+      process(tokens, data_stack, return_stack, dictionary, %{meta | sleep: 0})
+    end
+  end
+
   # process consumed all available reductions
   def next(tokens, data_stack, return_stack, dictionary, %{reductions: 0} = meta) do
     {:yield, {tokens, data_stack, return_stack, dictionary, meta}, nil}
@@ -57,6 +67,10 @@ defmodule ForthVM.Core do
   def exit(tokens, data_stack, return_stack, dictionary, meta, exit_value) do
     {:exit, {tokens, data_stack, return_stack, dictionary, meta}, exit_value}
   end
+
+  #---------------------------------------------
+  # Handle sleep
+  #---------------------------------------------
 
   #---------------------------------------------
   # Dictionary utilities
@@ -169,7 +183,7 @@ defmodule ForthVM.Core do
   # Flow control: if_condition IF if_stack [ELSE else_stack] THEN
   #---------------------------------------------
 
-  # CLOSING CONDITIONS
+  # NEEDS TO BE IMPLEMENTED HERE AS IT HAS UNNAMED WORDS
 
   # there is an if/else clause on top or return_stack AND if_condition is FALSELY
   def process(["then" | tokens ], data_stack, [if_condition, %{if: _if_stack, else: else_stack} | return_stack], dictionary, meta) when is_falsely(if_condition) do
@@ -213,68 +227,12 @@ defmodule ForthVM.Core do
     next(tokens, data_stack, [if_condition, %{if: []} | return_stack], dictionary, meta)
   end
 
-  # #---------------------------------------------
-  # # Flow control: start end DO do_stack LOOP
-  # #---------------------------------------------
-
-  # # DO/LOOP WORD ACCUMULATION
-
-  # def process(["do" | tokens ], [count, end_count | data_stack], return_stack, dictionary, meta)  do
-  #   next(tokens, data_stack, [count, end_count, %{do: tokens} | return_stack], dictionary, meta)
-  # end
-
-  # # copy the top of a LOOP's return stack to the data stack
-  # def process(["i" | tokens ], data_stack, [count, _end_count, %{do: _do_tokens} | _] = return_stack, dictionary, meta)  do
-  #   next(tokens, [count | data_stack], return_stack, dictionary, meta)
-  # end
-
-  # # copy the top of the return stack to the data stack
-  # def process(["r@" | tokens ], data_stack, [count | _] = return_stack, dictionary, meta)  do
-  #   next(tokens, [count | data_stack], return_stack, dictionary, meta)
-  # end
-
-  # # move the top of the data stack to the return stack
-  # def process([">r" | tokens ], [data | data_stack], return_stack, dictionary, meta)  do
-  #   next(tokens, data_stack, [data | return_stack], dictionary, meta)
-  # end
-
-  # # move the top of the return stack to the data stack
-  # def process(["r>" | tokens ], data_stack, [data | return_stack], dictionary, meta)  do
-  #   next(tokens, [data | data_stack], return_stack, dictionary, meta)
-  # end
-
-  # # copy data from return stack after LOOP's definition to the data stack
-  # def process(["j" | tokens ], data_stack, [_count, _end_count, %{do: _do_tokens}, data | _] = return_stack, dictionary, meta)  do
-  #   next(tokens, [data | data_stack], return_stack, dictionary, meta)
-  # end
-
-  # # loop: keep processing do_tokens till count < end_count, each step incrementing count by 1
-  # def process(["loop" | tokens ], data_stack, [count, end_count, %{do: do_tokens} | return_stack], dictionary, meta)  do
-  #   count = count + 1
-
-  #   case count < end_count do
-  #     true -> next(do_tokens, data_stack, [count, end_count, %{do: do_tokens} | return_stack], dictionary, meta)
-  #     false -> next(tokens, data_stack, return_stack, dictionary, meta)
-  #   end
-  # end
-
-  # # loop: keep processing do_tokens till count < end_count, incrementing count by top value on the data stack
-  # def process(["+loop" | tokens ], [inc | data_stack], [count, end_count, %{do: do_tokens} | return_stack], dictionary, meta)  do
-  #   count = count + inc
-
-  #   case count < end_count do
-  #     true -> next(do_tokens, data_stack, [count, end_count, %{do: do_tokens} | return_stack], dictionary, meta)
-  #     false -> next(tokens, data_stack, return_stack, dictionary, meta)
-  #   end
-  # end
-
   #---------------------------------------------
   # Literal values
   #---------------------------------------------
 
   def process([value | tokens ], data_stack, return_stack, dictionary, meta) when not is_binary(value) do
     next(tokens, [value | data_stack], return_stack, dictionary, meta)
-
   end
 
   #---------------------------------------------
@@ -294,6 +252,10 @@ defmodule ForthVM.Core do
       {:const, value} -> {tokens, [value | data_stack], return_stack, dictionary, meta}
       # unknown: copy value on top of data stack
       {:unknown_word, value} -> {tokens, [value | data_stack], return_stack, dictionary, meta}
+      # error: print message and exit
+      {:error, _context, message} = error ->
+        IO.puts("Error: #{message}")
+        error
       # invalid: should never happen
       invalid -> raise "invalid word definition: #{inspect(invalid, limit: :infinity)}"
     end

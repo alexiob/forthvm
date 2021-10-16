@@ -40,5 +40,4 @@ defmodule ForthVM.CoreTest do
   test "Core processor should print hello world" do
     assert capture_io(fn -> core_run(@source_2) end) == "*** Hello wonderful world! ***\n"
   end
-
 end
