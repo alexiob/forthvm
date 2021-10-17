@@ -2,7 +2,6 @@ defmodule ForthVM.CoreWordsMathTest do
   use ExUnit.Case, async: true
   import TestHelpers
 
-
   test "+" do
     assert {:exit, _, 42} = core_run("20 22 +")
   end
@@ -91,5 +90,4 @@ defmodule ForthVM.CoreWordsMathTest do
     _expeted = :math.pi()
     assert {:exit, _, _expected} = core_run("pi")
   end
-
 end

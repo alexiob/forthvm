@@ -21,7 +21,8 @@ defmodule ForthVM.Repl do
     loop(process(tokens, context))
   end
 
-  def process(command_tokens, {tokens, data_stack, return_stack, dictionary, meta}) when is_list(tokens) do
+  def process(command_tokens, {tokens, data_stack, return_stack, dictionary, meta})
+      when is_list(tokens) do
     process({command_tokens ++ tokens, data_stack, return_stack, dictionary, meta})
   end
 
@@ -33,6 +34,7 @@ defmodule ForthVM.Repl do
         end
 
         loop(context)
+
       {:yield, context, _} ->
         process(context)
     end

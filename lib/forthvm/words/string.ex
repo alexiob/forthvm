@@ -1,11 +1,11 @@
 defmodule ForthVM.Words.String do
   alias ForthVM.Core
 
-  #---------------------------------------------
+  # ---------------------------------------------
   # String manipulation
-  #---------------------------------------------
+  # ---------------------------------------------
 
-  @doc"""
+  @doc """
   .": ( -- s ) convert all next tokens to a single string, till " is found
   """
   def string_start(tokens, data_stack, return_stack, dictionary, meta) do

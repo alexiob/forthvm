@@ -2,7 +2,6 @@ defmodule ForthVM.CoreWordsStackTest do
   use ExUnit.Case, async: true
   import TestHelpers
 
-
   test "depth" do
     assert {:exit, _, [2 | _]} = core_run("20 22 depth")
   end
@@ -54,5 +53,4 @@ defmodule ForthVM.CoreWordsStackTest do
   test "-rot" do
     assert {:exit, _, [3, 2, 4, 1, "bottom"]} = core_run("bottom 1 2 3 4 -rot")
   end
-
 end

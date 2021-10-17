@@ -1,7 +1,7 @@
 defmodule ForthVM.Core.Dictionary do
-  #---------------------------------------------
+  # ---------------------------------------------
   # Dictionary utilities
-  #---------------------------------------------
+  # ---------------------------------------------
 
   def get(dictionary, word_name) do
     case Map.has_key?(dictionary, word_name) do
@@ -10,7 +10,8 @@ defmodule ForthVM.Core.Dictionary do
     end
   end
 
-  def add(dictionary, word_name, word, doc \\ %{ stack: "( )", doc: ""}) when is_list(word) or is_function(word) do
+  def add(dictionary, word_name, word, doc \\ %{stack: "( )", doc: ""})
+      when is_list(word) or is_function(word) do
     Map.put(dictionary, word_name, {:word, word, doc})
   end
 
@@ -42,7 +43,7 @@ defmodule ForthVM.Core.Dictionary do
       ForthVM.Words.Logic,
       ForthVM.Words.Math,
       ForthVM.Words.Stack,
-      ForthVM.Words.String,
+      ForthVM.Words.String
     ]
 
     Enum.reduce(word_modules, dictionary, &register_module_words/2)
@@ -55,23 +56,35 @@ defmodule ForthVM.Core.Dictionary do
     {_, _, :elixir, _, _, _, docs} = Code.fetch_docs(module)
 
     docs
-    |> Enum.reduce(dictionary, fn(doc, dict) -> register_module_word_from_doc(module, doc, dict) end)
+    |> Enum.reduce(dictionary, fn doc, dict ->
+      register_module_word_from_doc(module, doc, dict)
+    end)
   end
 
-  def register_module_word_from_doc(module, {{:function, function, arity}, _, [_header], %{"en" => doc}, _}, dictionary) when is_binary(doc) do
-    %{"doc" => word_doc, "name" => word_name, "stack" => word_stack} = Regex.named_captures(~r/^\s*(?<name>.+)\s*\:\s*(?<stack>\([^)]*\))+\s*(?<doc>.*)?$/, doc)
+  def register_module_word_from_doc(
+        module,
+        {{:function, function, arity}, _, [_header], %{"en" => doc}, _},
+        dictionary
+      )
+      when is_binary(doc) do
+    %{"doc" => word_doc, "name" => word_name, "stack" => word_stack} =
+      Regex.named_captures(~r/^\s*(?<name>.+)\s*\:\s*(?<stack>\([^)]*\))+\s*(?<doc>.*)?$/, doc)
 
-    word_name = cond do
-      Regex.match?(~r/^\"(.*)\"$/, word_name) -> String.trim(word_name, "\"")
-      true -> word_name
-    end
+    word_name =
+      cond do
+        Regex.match?(~r/^\"(.*)\"$/, word_name) -> String.trim(word_name, "\"")
+        true -> word_name
+      end
 
     # IO.puts(">>> CAPTURING: #{function}:#{arity} -> name=#{word_name} stack=#{word_stack} doc=#{word_doc}")
-    add(dictionary, word_name, Function.capture(module, function, arity), %{stack: word_stack, doc: word_doc})
+    add(dictionary, word_name, Function.capture(module, function, arity), %{
+      stack: word_stack,
+      doc: word_doc
+    })
   end
+
   def register_module_word_from_doc(_module, doc, dictionary) do
     IO.inspect(doc, label: ">>> IGNORED WORD DEF")
     dictionary
   end
-
 end

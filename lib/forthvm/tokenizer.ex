@@ -26,7 +26,8 @@ defmodule ForthVM.Tokenizer do
   end
 
   # Handle words with core types: boolean, float, integer, nil
-  def parse_line(source) when is_boolean(source) or is_float(source) or is_integer(source) or is_nil(source) do
+  def parse_line(source)
+      when is_boolean(source) or is_float(source) or is_integer(source) or is_nil(source) do
     source
   end
 
@@ -34,8 +35,8 @@ defmodule ForthVM.Tokenizer do
   Split line by space delimited words, respecting double quoted strings
   """
   def split_line(line) do
-    Regex.split(~r{\s+|"(?:\\"|[^"])+"}, String.trim((line)), include_captures: true)
-    |> Enum.map(fn s -> s |> String.trim() |> String.trim("\"") end )
+    Regex.split(~r{\s+|"(?:\\"|[^"])+"}, String.trim(line), include_captures: true)
+    |> Enum.map(fn s -> s |> String.trim() |> String.trim("\"") end)
     |> Enum.filter(fn s -> s != "" end)
   end
 
@@ -50,7 +51,6 @@ defmodule ForthVM.Tokenizer do
 
   def tokenize_word(input, acc) do
     case tokenize_word(input) do
-      {:skip} -> {:halt, acc}
       token -> {:cont, [token | acc]}
     end
   end
@@ -119,8 +119,11 @@ defmodule ForthVM.Tokenizer do
 
   def collect_labels(token, acc) do
     case token do
-      "::" <> name when is_binary(name) and name != "" -> %{acc | labels: Map.put_new(acc.labels, name, acc.idx)}
-      token -> %{acc | tokens: [token | acc.tokens], idx: acc.idx + 1}
+      "::" <> name when is_binary(name) and name != "" ->
+        %{acc | labels: Map.put_new(acc.labels, name, acc.idx)}
+
+      token ->
+        %{acc | tokens: [token | acc.tokens], idx: acc.idx + 1}
     end
   end
 
@@ -129,8 +132,11 @@ defmodule ForthVM.Tokenizer do
     |> Enum.with_index()
     |> Enum.map(fn {token, idx} ->
       case token do
-        ":" <> name when is_binary(name) and name != "" -> label_to_idx(Map.get(labels, name), idx)
-        token -> token
+        ":" <> name when is_binary(name) and name != "" ->
+          label_to_idx(Map.get(labels, name), idx)
+
+        token ->
+          token
       end
     end)
   end

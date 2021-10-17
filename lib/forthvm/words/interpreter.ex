@@ -5,25 +5,25 @@ defmodule ForthVM.Words.Interpreter do
   alias ForthVM.Core.Dictionary
   alias ForthVM.Tokenizer
 
-  #---------------------------------------------
+  # ---------------------------------------------
   # Process exit conditions
-  #---------------------------------------------
+  # ---------------------------------------------
 
-  @doc"""
+  @doc """
   end: ( -- ) ( R: -- ) explicit process termination
   """
   def _end(_tokens, data_stack, return_stack, dictionary, meta) do
     Core.next([], data_stack, return_stack, dictionary, meta)
   end
 
-  @doc"""
+  @doc """
   abort: ( i * x -- ) ( R: j * x -- ) empty the data stack and perform the function of QUIT, which includes emptying the return stack, without displaying a message.
   """
   def abort(_tokens, _data_stack, _return_stack, dictionary, meta) do
     Core.next([], [], [], dictionary, meta)
   end
 
-  @doc"""
+  @doc """
   abort?: ( flag i * x -- ) ( R: j * x -- ) if flag is truthly empty the data stack and perform the function of QUIT, which includes emptying the return stack, displaying a message.
   """
   def abort_msg([message | tokens], [flag | data_stack], return_stack, dictionary, meta) do
@@ -35,11 +35,11 @@ defmodule ForthVM.Words.Interpreter do
     end
   end
 
-  #---------------------------------------------
+  # ---------------------------------------------
   # Sleep
-  #---------------------------------------------
+  # ---------------------------------------------
 
-  @doc"""
+  @doc """
   sleep: ( x -- ) sleep for given milliseconds
   """
   def sleep(tokens, [ms | data_stack], return_stack, dictionary, meta) do
@@ -47,11 +47,11 @@ defmodule ForthVM.Words.Interpreter do
     Core.next(tokens, data_stack, return_stack, dictionary, %{meta | sleep: till})
   end
 
-  #---------------------------------------------
+  # ---------------------------------------------
   # Word definition
-  #---------------------------------------------
+  # ---------------------------------------------
 
-  @doc"""
+  @doc """
   "(": ( -- ) discard all tokens till ")" is fountd
   """
   def comment(tokens, data_stack, return_stack, dictionary, meta) do
@@ -60,125 +60,151 @@ defmodule ForthVM.Words.Interpreter do
     Core.next(tokens, data_stack, return_stack, dictionary, meta)
   end
 
-  #---------------------------------------------
+  # ---------------------------------------------
   # Word definition
-  #---------------------------------------------
+  # ---------------------------------------------
 
-  @doc"""
+  @doc """
   ":": ( -- ) convert all tokens till ";" is found into a new word
   """
   def create([word_name | tokens], data_stack, return_stack, dictionary, meta) do
     # FIXME: implement `is-interpret` and `immediate`
     {word_tokens, [";" | tokens]} = Enum.split_while(tokens, fn s -> s != ";" end)
 
-    Core.next(tokens, data_stack, return_stack, Dictionary.add(dictionary, word_name, word_tokens), meta)
+    Core.next(
+      tokens,
+      data_stack,
+      return_stack,
+      Dictionary.add(dictionary, word_name, word_tokens),
+      meta
+    )
   end
 
-  @doc"""
+  @doc """
   variable: ( -- ) create a new variable with name from next token
   """
   def variable([word_name | tokens], data_stack, return_stack, dictionary, meta) do
-    dictionary = case Map.has_key?(dictionary, word_name) do
-      true -> dictionary
-      false -> Dictionary.add_var(dictionary, word_name, nil)
-    end
+    dictionary =
+      case Map.has_key?(dictionary, word_name) do
+        true -> dictionary
+        false -> Dictionary.add_var(dictionary, word_name, nil)
+      end
 
     Core.next(tokens, data_stack, return_stack, dictionary, meta)
   end
 
-  @doc"""
+  @doc """
   "!": ( x name -- ) store value in variable
   """
   def set_variable(tokens, [word_name, x | data_stack], return_stack, dictionary, meta) do
     case Map.has_key?(dictionary, word_name) do
-      false -> error(
-        "can not set unknown variable '#{word_name}' with value '#{inspect(x)}'",
-        {tokens, data_stack, return_stack, dictionary, meta}
-      )
-      true -> Core.next(
-        tokens,
-        data_stack,
-        return_stack,
-        Dictionary.set_var(dictionary, word_name, x),
-        meta
-      )
+      false ->
+        error(
+          "can not set unknown variable '#{word_name}' with value '#{inspect(x)}'",
+          {tokens, data_stack, return_stack, dictionary, meta}
+        )
+
+      true ->
+        Core.next(
+          tokens,
+          data_stack,
+          return_stack,
+          Dictionary.set_var(dictionary, word_name, x),
+          meta
+        )
     end
   end
 
-  @doc"""
+  @doc """
   "+!": ( x name -- ) increment variable by given value
   """
   def inc_variable(tokens, [word_name, x | data_stack], return_stack, dictionary, meta) do
     case Map.has_key?(dictionary, word_name) do
-      false -> error(
-        "can not increment unknown variable '#{word_name}' by '#{inspect(x)}'",
-        {tokens, data_stack, return_stack, dictionary, meta}
-      )
+      false ->
+        error(
+          "can not increment unknown variable '#{word_name}' by '#{inspect(x)}'",
+          {tokens, data_stack, return_stack, dictionary, meta}
+        )
+
       # FIXME: should handle :undefined ?
-      true -> Core.next(
-        tokens,
-        data_stack,
-        return_stack,
-        Dictionary.set_var(dictionary, word_name, Dictionary.get_var(dictionary, word_name) + x),
-        meta
-      )
+      true ->
+        Core.next(
+          tokens,
+          data_stack,
+          return_stack,
+          Dictionary.set_var(
+            dictionary,
+            word_name,
+            Dictionary.get_var(dictionary, word_name) + x
+          ),
+          meta
+        )
     end
   end
 
-  @doc"""
+  @doc """
   "@": ( name -- ) get value in variable
   """
   def get_variable(tokens, [word_name | data_stack], return_stack, dictionary, meta) do
     case Map.has_key?(dictionary, word_name) do
-      false -> error(
-        "can not fetch unknown variable '#{word_name}'",
-        {tokens, data_stack, return_stack, dictionary, meta}
-      )
-      true -> Core.next(
-        tokens,
-        [Dictionary.get_var(dictionary, word_name) | data_stack],
-        return_stack,
-        dictionary,
-        meta
-      )
+      false ->
+        error(
+          "can not fetch unknown variable '#{word_name}'",
+          {tokens, data_stack, return_stack, dictionary, meta}
+        )
+
+      true ->
+        Core.next(
+          tokens,
+          [Dictionary.get_var(dictionary, word_name) | data_stack],
+          return_stack,
+          dictionary,
+          meta
+        )
     end
   end
 
-  @doc"""
+  @doc """
   constant: ( x -- ) create a new costant with name from next token and value from data stack
   """
   def constant([word_name | tokens], [x | data_stack], return_stack, dictionary, meta) do
     case Map.has_key?(dictionary, word_name) do
-      true -> error(
-        "can not set already defined constant '#{word_name}' with new value '#{inspect(x)}'",
-        {tokens, data_stack, return_stack, dictionary, meta}
-      )
-      false -> Core.next(
-        tokens,
-        data_stack,
-        return_stack,
-        Dictionary.add_const(dictionary, word_name, x),
-        meta
-      )
+      true ->
+        error(
+          "can not set already defined constant '#{word_name}' with new value '#{inspect(x)}'",
+          {tokens, data_stack, return_stack, dictionary, meta}
+        )
+
+      false ->
+        Core.next(
+          tokens,
+          data_stack,
+          return_stack,
+          Dictionary.add_const(dictionary, word_name, x),
+          meta
+        )
     end
   end
 
-  @doc"""
+  @doc """
   include: ( -- ) include program file from filename specified in next token.
   """
   def include([filename | tokens], data_stack, return_stack, dictionary, meta) do
     case File.read(filename) do
-      {:ok, source} -> Core.next(
-        Tokenizer.parse(source) ++ tokens,
-        data_stack,
-        return_stack,
-        dictionary,
-        meta
-      )
-      {:error, file_error} -> error(
-        "can not include '#{filename}' because '#{inspect(file_error)}'",
-        {tokens, data_stack, return_stack, dictionary, meta}
-      )
+      {:ok, source} ->
+        Core.next(
+          Tokenizer.parse(source) ++ tokens,
+          data_stack,
+          return_stack,
+          dictionary,
+          meta
+        )
+
+      {:error, file_error} ->
+        error(
+          "can not include '#{filename}' because '#{inspect(file_error)}'",
+          {tokens, data_stack, return_stack, dictionary, meta}
+        )
     end
   end
 end

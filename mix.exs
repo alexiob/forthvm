@@ -20,8 +20,6 @@ defmodule ForthVM.MixProject do
 
   # Run "mix help deps" to learn about dependencies.
   defp deps do
-    [
-      {:aja, "~> 0.5.3"}
-    ]
+    []
   end
 end
