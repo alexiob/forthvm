@@ -325,10 +325,14 @@ defmodule ForthVM.Core do
     result =
       case get_dictionary_word(dictionary, word_name) do
         # function: execute function
-        {:word, function, _} when is_function(function) ->
+        {:word, function, word_meta} when is_function(function) ->
           try do
             function.(tokens, data_stack, return_stack, dictionary, meta)
           rescue
+            _e in FunctionClauseError ->
+              message = "processing word '#{word_name}' #{word_meta.doc}"
+              error(message, {tokens, data_stack, return_stack, dictionary, meta})
+
             e ->
               error(e.message, {tokens, data_stack, return_stack, dictionary, meta})
           end
