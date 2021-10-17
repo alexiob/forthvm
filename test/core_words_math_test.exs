@@ -10,6 +10,10 @@ defmodule ForthVM.CoreWordsMathTest do
     assert {:exit, _, 42.5} = core_run("20.5 22 +")
   end
 
+  test "+ with string should error" do
+    assert {:error, _, "bad argument in arithmetic expression"} = core_run("20 wrong +")
+  end
+
   test "-" do
     assert {:exit, _, -2} = core_run("20 22 -")
   end

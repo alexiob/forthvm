@@ -99,10 +99,7 @@ defmodule ForthVM.Words.Interpreter do
   def set_variable(tokens, [word_name, x | data_stack], return_stack, dictionary, meta) do
     case Map.has_key?(dictionary, word_name) do
       false ->
-        error(
-          "can not set unknown variable '#{word_name}' with value '#{inspect(x)}'",
-          {tokens, data_stack, return_stack, dictionary, meta}
-        )
+        raise("can not set unknown variable '#{word_name}' with value '#{inspect(x)}'")
 
       true ->
         Core.next(
@@ -121,10 +118,7 @@ defmodule ForthVM.Words.Interpreter do
   def inc_variable(tokens, [word_name, x | data_stack], return_stack, dictionary, meta) do
     case Map.has_key?(dictionary, word_name) do
       false ->
-        error(
-          "can not increment unknown variable '#{word_name}' by '#{inspect(x)}'",
-          {tokens, data_stack, return_stack, dictionary, meta}
-        )
+        raise("can not increment unknown variable '#{word_name}' by '#{inspect(x)}'")
 
       # FIXME: should handle :undefined ?
       true ->
@@ -148,10 +142,7 @@ defmodule ForthVM.Words.Interpreter do
   def get_variable(tokens, [word_name | data_stack], return_stack, dictionary, meta) do
     case Map.has_key?(dictionary, word_name) do
       false ->
-        error(
-          "can not fetch unknown variable '#{word_name}'",
-          {tokens, data_stack, return_stack, dictionary, meta}
-        )
+        raise("can not fetch unknown variable '#{word_name}'")
 
       true ->
         Core.next(
@@ -170,9 +161,8 @@ defmodule ForthVM.Words.Interpreter do
   def constant([word_name | tokens], [x | data_stack], return_stack, dictionary, meta) do
     case Map.has_key?(dictionary, word_name) do
       true ->
-        error(
-          "can not set already defined constant '#{word_name}' with new value '#{inspect(x)}'",
-          {tokens, data_stack, return_stack, dictionary, meta}
+        raise(
+          "can not set already defined constant '#{word_name}' with new value '#{inspect(x)}'"
         )
 
       false ->
@@ -201,10 +191,7 @@ defmodule ForthVM.Words.Interpreter do
         )
 
       {:error, file_error} ->
-        error(
-          "can not include '#{filename}' because '#{inspect(file_error)}'",
-          {tokens, data_stack, return_stack, dictionary, meta}
-        )
+        raise("can not include '#{filename}' because '#{inspect(file_error)}'")
     end
   end
 end

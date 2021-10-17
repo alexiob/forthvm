@@ -326,7 +326,12 @@ defmodule ForthVM.Core do
       case get_dictionary_word(dictionary, word_name) do
         # function: execute function
         {:word, function, _} when is_function(function) ->
-          function.(tokens, data_stack, return_stack, dictionary, meta)
+          try do
+            function.(tokens, data_stack, return_stack, dictionary, meta)
+          rescue
+            e ->
+              error(e.message, {tokens, data_stack, return_stack, dictionary, meta})
+          end
 
         # tokens: add tokens at beginning of current tokens
         {:word, word_tokens, _} when is_list(word_tokens) ->
@@ -345,13 +350,15 @@ defmodule ForthVM.Core do
           {tokens, [value | data_stack], return_stack, dictionary, meta}
 
         # error: print message and exit
-        {:error, _context, message} = error ->
-          IO.puts("Error: #{message}")
-          error
+        {:error, context, message} ->
+          error(message, context)
 
         # invalid: should never happen
         invalid ->
-          raise "invalid word definition: #{inspect(invalid, limit: :infinity)}"
+          error(
+            "invalid word definition: #{inspect(invalid, limit: :infinity)}",
+            {tokens, data_stack, return_stack, dictionary, meta}
+          )
       end
 
     # handle responses

@@ -159,14 +159,14 @@ defmodule ForthVM.Words.Logic do
   end
 
   @doc """
-  ^: ( x y -- v ) bitwise shift left
+  <<: ( x y -- v ) bitwise shift left
   """
   def b_shift_left(tokens, [y, x | data_stack], return_stack, dictionary, meta) do
     Core.next(tokens, [Bitwise.bsl(x, y) | data_stack], return_stack, dictionary, meta)
   end
 
   @doc """
-  ^: ( x y -- v ) bitwise shift right
+  >>: ( x y -- v ) bitwise shift right
   """
   def b_shift_right(tokens, [y, x | data_stack], return_stack, dictionary, meta) do
     Core.next(tokens, [Bitwise.bsr(x, y) | data_stack], return_stack, dictionary, meta)
