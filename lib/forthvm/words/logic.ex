@@ -18,6 +18,13 @@ defmodule ForthVM.Words.Logic do
   end
 
   @doc """
+  0=: ( x -- bool ) check value is euqal to 0
+  """
+  def zeq(tokens, [x | data_stack], return_stack, dictionary, meta) do
+    Core.next(tokens, [x == 0 | data_stack], return_stack, dictionary, meta)
+  end
+
+  @doc """
   <>: ( x y -- bool ) check two values are different. Works on different types
   """
   def neq(tokens, [y, x | data_stack], return_stack, dictionary, meta) do

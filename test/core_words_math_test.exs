@@ -58,6 +58,10 @@ defmodule ForthVM.CoreWordsMathTest do
     assert {:exit, _, 42} = core_run("-42 abs")
   end
 
+  test "negate -42" do
+    assert {:exit, _, 42} = core_run("-42 @-")
+  end
+
   test "rand" do
     assert {:exit, _, number} = core_run("rand")
     assert is_number(number)

@@ -48,6 +48,13 @@ defmodule ForthVM.Words.Math do
   end
 
   @doc """
+  */: ( x -- n ) perform multiplication and divide result by x
+  """
+  def mult_div(tokens, [x | data_stack], return_stack, dictionary, meta) do
+    Core.next(["*", x, "/" | tokens], data_stack, return_stack, dictionary, meta)
+  end
+
+  @doc """
   1+: ( x -- n ) adds 1 to x
   """
   def one_plus(tokens, [x | data_stack], return_stack, dictionary, meta) do
@@ -62,7 +69,7 @@ defmodule ForthVM.Words.Math do
   end
 
   @doc """
-  @-, negate: ( x -- n ) negates x
+  @-: ( x -- n ) negates x
   """
   def negate(tokens, [x | data_stack], return_stack, dictionary, meta) do
     Core.next(tokens, [-x | data_stack], return_stack, dictionary, meta)
@@ -120,7 +127,7 @@ defmodule ForthVM.Words.Math do
   @doc """
   tan: ( x -- n ) tan of x
   """
-  def yan(tokens, [x | data_stack], return_stack, dictionary, meta) do
+  def tan(tokens, [x | data_stack], return_stack, dictionary, meta) do
     Core.next(tokens, [:math.tan(x) | data_stack], return_stack, dictionary, meta)
   end
 

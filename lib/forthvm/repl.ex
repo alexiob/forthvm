@@ -35,6 +35,11 @@ defmodule ForthVM.Repl do
 
         loop(context)
 
+      {:error, context, message} ->
+        IO.puts("> Error #{message}")
+
+        loop(context)
+
       {:yield, context, _} ->
         process(context)
     end

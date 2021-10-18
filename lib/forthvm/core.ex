@@ -302,7 +302,7 @@ defmodule ForthVM.Core do
   end
 
   # initialize if stack
-  def process(["if" | tokens], data_stack, [if_condition | return_stack], dictionary, meta) do
+  def process(["if" | tokens], [if_condition | data_stack], return_stack, dictionary, meta) do
     next(tokens, data_stack, [if_condition, %{if: []} | return_stack], dictionary, meta)
   end
 
