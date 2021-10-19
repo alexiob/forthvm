@@ -48,7 +48,7 @@ defmodule ForthVM.Words.Interpreter do
   end
 
   # ---------------------------------------------
-  # Word definition
+  # Comments
   # ---------------------------------------------
 
   @doc """

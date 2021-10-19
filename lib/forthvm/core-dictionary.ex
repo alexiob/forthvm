@@ -43,7 +43,8 @@ defmodule ForthVM.Core.Dictionary do
       ForthVM.Words.Logic,
       ForthVM.Words.Math,
       ForthVM.Words.Stack,
-      ForthVM.Words.String
+      ForthVM.Words.String,
+      ForthVM.Words.Data
     ]
 
     Enum.reduce(word_modules, dictionary, &register_module_words/2)
