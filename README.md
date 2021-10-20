@@ -8,9 +8,11 @@ Very simple Forth VM/Interpreter written in Elixir
 - [x] loops
 - [x] if-then
 - [x] include
-- [ ] REPL
-- [ ] sleep word
+- [x] REPL
+- [x] sleep word
+- [x] list type definition
 - [ ] VM
-- [ ] multiple Forth cores running in a single VM
+- [ ] multiple Forth processes running in a single VM
 - [ ] process messages: sending messages to a process will call a matching word
 - [ ] step-by-step debugger
+- [ ] real Forth: define and handled immediate words

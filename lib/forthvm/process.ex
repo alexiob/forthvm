@@ -42,7 +42,7 @@ defmodule ForthVM.Process do
     process(tokens, data_stack, return_stack, dictionary, %{meta | reductions: reductions})
   end
 
-  # load a program into the core
+  # load a program into the process
   def load({_tokens, _data_stack, _return_stack, dictionary, meta}, tokens) do
     {tokens, [], [], dictionary, %{meta | sleep: 0, reductions: 0}}
   end
