@@ -1,4 +1,4 @@
-defmodule ForthVM.Core.Dictionary do
+defmodule ForthVM.Dictionary do
   # ---------------------------------------------
   # Dictionary utilities
   # ---------------------------------------------

@@ -1,6 +1,6 @@
 defmodule ForthVM.Repl do
   alias ForthVM.Core
-  alias ForthVM.Core.Dictionary
+  alias ForthVM.Dictionary
   alias ForthVM.Tokenizer
 
   @prompt ">> "

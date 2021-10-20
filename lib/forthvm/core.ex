@@ -1,9 +1,18 @@
 defmodule ForthVM.Core do
   import ForthVM.Core.Utils
 
+  defstruct name: "", id: 0, context: {}
   # ---------------------------------------------
   # Custom guards
   # ---------------------------------------------
+
+  def new(name, id, dictionary \\ nil) do
+    %__MODULE__{
+      name: name,
+      id: id,
+      context: {[], [], [], dictionary || ForthVM.Dictionary.new(), new_meta()}
+    }
+  end
 
   def new_meta() do
     %{
@@ -31,6 +40,11 @@ defmodule ForthVM.Core do
   # run program defined in the provided context, for, at max, number of reductions
   def run({tokens, data_stack, return_stack, dictionary, meta}, reductions) do
     process(tokens, data_stack, return_stack, dictionary, %{meta | reductions: reductions})
+  end
+
+  # load a program into the core
+  def load({_tokens, _data_stack, _return_stack, dictionary, meta}, tokens) do
+    {tokens, [], [], dictionary, %{meta | sleep: 0, reductions: 0}}
   end
 
   # ---------------------------------------------

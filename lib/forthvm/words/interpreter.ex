@@ -2,7 +2,7 @@ defmodule ForthVM.Words.Interpreter do
   import ForthVM.Core.Utils
 
   alias ForthVM.Core
-  alias ForthVM.Core.Dictionary
+  alias ForthVM.Dictionary
   alias ForthVM.Tokenizer
 
   # ---------------------------------------------

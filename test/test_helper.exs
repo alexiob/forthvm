@@ -2,7 +2,7 @@ ExUnit.start()
 
 defmodule TestHelpers do
   alias ForthVM.Tokenizer
-  alias ForthVM.Core.Dictionary
+  alias ForthVM.Dictionary
   alias ForthVM.Core
 
   @reductions 1000
