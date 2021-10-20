@@ -1,15 +1,15 @@
 defmodule ForthVM.Process do
   import ForthVM.Utils
 
-  defstruct name: "", id: 0, context: {}
+  defstruct id: "", context: {}
+
   # ---------------------------------------------
   # Custom guards
   # ---------------------------------------------
 
-  def new(name, id, dictionary \\ nil) do
+  def new(id \\ nil, dictionary \\ nil) do
     %__MODULE__{
-      name: name,
-      id: id,
+      id: id || System.unique_integer(),
       context: {[], [], [], dictionary || ForthVM.Dictionary.new(), new_meta()}
     }
   end

@@ -43,7 +43,7 @@ defmodule ForthVM.ProcessTest do
 
   test "Process should load code and print hello world" do
     assert capture_io(fn ->
-             process = ForthVM.Process.new("load and run", 1)
+             process = ForthVM.Process.new()
 
              ForthVM.Process.load(process.context, ForthVM.Tokenizer.parse(@source_2))
              |> ForthVM.Process.run(1000)
