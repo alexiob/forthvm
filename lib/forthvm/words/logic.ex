@@ -1,7 +1,7 @@
 defmodule ForthVM.Words.Logic do
-  import ForthVM.Core.Utils
+  import ForthVM.Utils
 
-  alias ForthVM.Core
+  alias ForthVM.Process
 
   @c_true true
   @c_false false
@@ -14,63 +14,63 @@ defmodule ForthVM.Words.Logic do
   =: ( x y -- bool ) check two values are equal. Works on different types
   """
   def eq(tokens, [y, x | data_stack], return_stack, dictionary, meta) do
-    Core.next(tokens, [x == y | data_stack], return_stack, dictionary, meta)
+    Process.next(tokens, [x == y | data_stack], return_stack, dictionary, meta)
   end
 
   @doc """
   0=: ( x -- bool ) check value is euqal to 0
   """
   def zeq(tokens, [x | data_stack], return_stack, dictionary, meta) do
-    Core.next(tokens, [x == 0 | data_stack], return_stack, dictionary, meta)
+    Process.next(tokens, [x == 0 | data_stack], return_stack, dictionary, meta)
   end
 
   @doc """
   <>: ( x y -- bool ) check two values are different. Works on different types
   """
   def neq(tokens, [y, x | data_stack], return_stack, dictionary, meta) do
-    Core.next(tokens, [x != y | data_stack], return_stack, dictionary, meta)
+    Process.next(tokens, [x != y | data_stack], return_stack, dictionary, meta)
   end
 
   @doc """
   <: ( x y -- bool ) check if x is less than y
   """
   def lt(tokens, [y, x | data_stack], return_stack, dictionary, meta) do
-    Core.next(tokens, [x < y | data_stack], return_stack, dictionary, meta)
+    Process.next(tokens, [x < y | data_stack], return_stack, dictionary, meta)
   end
 
   @doc """
   <=: ( x y -- bool ) check if x is less than or equal to y
   """
   def lte(tokens, [y, x | data_stack], return_stack, dictionary, meta) do
-    Core.next(tokens, [x <= y | data_stack], return_stack, dictionary, meta)
+    Process.next(tokens, [x <= y | data_stack], return_stack, dictionary, meta)
   end
 
   @doc """
   >: ( x y -- bool ) check if x is greater than y
   """
   def gt(tokens, [y, x | data_stack], return_stack, dictionary, meta) do
-    Core.next(tokens, [x > y | data_stack], return_stack, dictionary, meta)
+    Process.next(tokens, [x > y | data_stack], return_stack, dictionary, meta)
   end
 
   @doc """
   >=: ( x y -- bool ) check if x is greater than or equal to y
   """
   def gte(tokens, [y, x | data_stack], return_stack, dictionary, meta) do
-    Core.next(tokens, [x >= y | data_stack], return_stack, dictionary, meta)
+    Process.next(tokens, [x >= y | data_stack], return_stack, dictionary, meta)
   end
 
   @doc """
   0<: ( x -- bool ) check if value is less than zero
   """
   def zle(tokens, [x | data_stack], return_stack, dictionary, meta) do
-    Core.next(tokens, [x < 0 | data_stack], return_stack, dictionary, meta)
+    Process.next(tokens, [x < 0 | data_stack], return_stack, dictionary, meta)
   end
 
   @doc """
   0>: ( x -- bool ) check if value is greater than zero
   """
   def zge(tokens, [x | data_stack], return_stack, dictionary, meta) do
-    Core.next(tokens, [x > 0 | data_stack], return_stack, dictionary, meta)
+    Process.next(tokens, [x > 0 | data_stack], return_stack, dictionary, meta)
   end
 
   # ---------------------------------------------
@@ -81,14 +81,14 @@ defmodule ForthVM.Words.Logic do
   true: ( -- bool ) the true constant
   """
   def const_true(tokens, data_stack, return_stack, dictionary, meta) do
-    Core.next(tokens, [@c_true | data_stack], return_stack, dictionary, meta)
+    Process.next(tokens, [@c_true | data_stack], return_stack, dictionary, meta)
   end
 
   @doc """
   false: ( -- bool ) the false constant
   """
   def const_false(tokens, data_stack, return_stack, dictionary, meta) do
-    Core.next(tokens, [@c_false | data_stack], return_stack, dictionary, meta)
+    Process.next(tokens, [@c_false | data_stack], return_stack, dictionary, meta)
   end
 
   @doc """
@@ -102,7 +102,7 @@ defmodule ForthVM.Words.Logic do
         @c_false
       end
 
-    Core.next(tokens, [b | data_stack], return_stack, dictionary, meta)
+    Process.next(tokens, [b | data_stack], return_stack, dictionary, meta)
   end
 
   @doc """
@@ -116,7 +116,7 @@ defmodule ForthVM.Words.Logic do
         @c_false
       end
 
-    Core.next(tokens, [b | data_stack], return_stack, dictionary, meta)
+    Process.next(tokens, [b | data_stack], return_stack, dictionary, meta)
   end
 
   @doc """
@@ -130,7 +130,7 @@ defmodule ForthVM.Words.Logic do
         @c_true
       end
 
-    Core.next(tokens, [b | data_stack], return_stack, dictionary, meta)
+    Process.next(tokens, [b | data_stack], return_stack, dictionary, meta)
   end
 
   # ---------------------------------------------
@@ -141,41 +141,41 @@ defmodule ForthVM.Words.Logic do
   &: ( x y -- v ) bitwise and
   """
   def b_and(tokens, [y, x | data_stack], return_stack, dictionary, meta) do
-    Core.next(tokens, [Bitwise.band(x, y) | data_stack], return_stack, dictionary, meta)
+    Process.next(tokens, [Bitwise.band(x, y) | data_stack], return_stack, dictionary, meta)
   end
 
   @doc """
   |: ( x y -- v ) bitwise or
   """
   def b_or(tokens, [y, x | data_stack], return_stack, dictionary, meta) do
-    Core.next(tokens, [Bitwise.bor(x, y) | data_stack], return_stack, dictionary, meta)
+    Process.next(tokens, [Bitwise.bor(x, y) | data_stack], return_stack, dictionary, meta)
   end
 
   @doc """
   ^: ( x y -- v ) bitwise xor
   """
   def b_xor(tokens, [y, x | data_stack], return_stack, dictionary, meta) do
-    Core.next(tokens, [Bitwise.bxor(x, y) | data_stack], return_stack, dictionary, meta)
+    Process.next(tokens, [Bitwise.bxor(x, y) | data_stack], return_stack, dictionary, meta)
   end
 
   @doc """
   ~: ( x -- v ) bitwise not
   """
   def b_not(tokens, [x | data_stack], return_stack, dictionary, meta) do
-    Core.next(tokens, [Bitwise.bnot(x) | data_stack], return_stack, dictionary, meta)
+    Process.next(tokens, [Bitwise.bnot(x) | data_stack], return_stack, dictionary, meta)
   end
 
   @doc """
   <<: ( x y -- v ) bitwise shift left
   """
   def b_shift_left(tokens, [y, x | data_stack], return_stack, dictionary, meta) do
-    Core.next(tokens, [Bitwise.bsl(x, y) | data_stack], return_stack, dictionary, meta)
+    Process.next(tokens, [Bitwise.bsl(x, y) | data_stack], return_stack, dictionary, meta)
   end
 
   @doc """
   >>: ( x y -- v ) bitwise shift right
   """
   def b_shift_right(tokens, [y, x | data_stack], return_stack, dictionary, meta) do
-    Core.next(tokens, [Bitwise.bsr(x, y) | data_stack], return_stack, dictionary, meta)
+    Process.next(tokens, [Bitwise.bsr(x, y) | data_stack], return_stack, dictionary, meta)
   end
 end

@@ -1,5 +1,5 @@
 defmodule ForthVM.Words.IO do
-  alias ForthVM.Core
+  alias ForthVM.Process
 
   # ---------------------------------------------
   # IO side effects
@@ -17,7 +17,7 @@ defmodule ForthVM.Words.IO do
       ) do
     device = Map.get(devices, device_name, device)
 
-    Core.next(tokens, data_stack, return_stack, dictionary, %{
+    Process.next(tokens, data_stack, return_stack, dictionary, %{
       meta
       | io: Map.put(meta.io, :device, device)
     })
@@ -29,7 +29,7 @@ defmodule ForthVM.Words.IO do
   def emit(tokens, [c | data_stack], return_stack, dictionary, %{io: %{device: device}} = meta) do
     IO.write(device, <<c>>)
 
-    Core.next(tokens, data_stack, return_stack, dictionary, meta)
+    Process.next(tokens, data_stack, return_stack, dictionary, meta)
   end
 
   @doc """
@@ -38,7 +38,7 @@ defmodule ForthVM.Words.IO do
   def cr(tokens, data_stack, return_stack, dictionary, %{io: %{device: device}} = meta) do
     IO.puts(device, "")
 
-    Core.next(tokens, data_stack, return_stack, dictionary, meta)
+    Process.next(tokens, data_stack, return_stack, dictionary, meta)
   end
 
   @doc """
@@ -47,7 +47,7 @@ defmodule ForthVM.Words.IO do
   def dot(tokens, [x | data_stack], return_stack, dictionary, %{io: %{device: device}} = meta) do
     IO.write(device, "#{x}")
 
-    Core.next(tokens, data_stack, return_stack, dictionary, meta)
+    Process.next(tokens, data_stack, return_stack, dictionary, meta)
   end
 
   @doc """
@@ -56,7 +56,7 @@ defmodule ForthVM.Words.IO do
   def puts(tokens, [x | data_stack], return_stack, dictionary, %{io: %{device: device}} = meta) do
     IO.puts(device, x)
 
-    Core.next(tokens, data_stack, return_stack, dictionary, meta)
+    Process.next(tokens, data_stack, return_stack, dictionary, meta)
   end
 
   @doc """
@@ -65,7 +65,7 @@ defmodule ForthVM.Words.IO do
   def inspect(tokens, [x | data_stack], return_stack, dictionary, %{io: %{device: device}} = meta) do
     IO.inspect(device, x, limit: :infinity)
 
-    Core.next(tokens, data_stack, return_stack, dictionary, meta)
+    Process.next(tokens, data_stack, return_stack, dictionary, meta)
   end
 
   @doc """
@@ -82,13 +82,13 @@ defmodule ForthVM.Words.IO do
     |> Enum.reverse()
     |> Enum.each(fn x -> IO.write(device, "#{x} ") end)
 
-    Core.next(tokens, data_stack, return_stack, dictionary, meta)
+    Process.next(tokens, data_stack, return_stack, dictionary, meta)
   end
 
   @doc """
   "?": ( var -- ) fetch a variable value and prints it
   """
   def fetch_puts(tokens, data_stack, return_stack, dictionary, meta) do
-    Core.next(["@", "." | tokens], data_stack, return_stack, dictionary, meta)
+    Process.next(["@", "." | tokens], data_stack, return_stack, dictionary, meta)
   end
 end

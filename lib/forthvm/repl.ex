@@ -1,5 +1,5 @@
 defmodule ForthVM.Repl do
-  alias ForthVM.Core
+  alias ForthVM.Process
   alias ForthVM.Dictionary
   alias ForthVM.Tokenizer
 
@@ -7,7 +7,7 @@ defmodule ForthVM.Repl do
   @reductions 100
 
   def context() do
-    {[], [], [], Dictionary.new(), Core.new_meta()}
+    {[], [], [], Dictionary.new(), Process.new_meta()}
   end
 
   def run() do
@@ -27,7 +27,7 @@ defmodule ForthVM.Repl do
   end
 
   def process(context) do
-    case Core.run(context, @reductions) do
+    case Process.run(context, @reductions) do
       {:exit, context, value} ->
         if value != nil do
           IO.inspect(value)

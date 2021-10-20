@@ -1,4 +1,4 @@
-defmodule ForthVM.CoreWordsMathTest do
+defmodule ForthVM.ProcessWordsMathTest do
   use ExUnit.Case, async: true
   import TestHelpers
 

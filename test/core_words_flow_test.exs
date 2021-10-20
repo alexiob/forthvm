@@ -1,4 +1,4 @@
-defmodule ForthVM.CoreWordFlowTest do
+defmodule ForthVM.ProcessWordFlowTest do
   use ExUnit.Case, async: true
   import ExUnit.CaptureIO
   import TestHelpers

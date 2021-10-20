@@ -3,7 +3,7 @@ ExUnit.start()
 defmodule TestHelpers do
   alias ForthVM.Tokenizer
   alias ForthVM.Dictionary
-  alias ForthVM.Core
+  alias ForthVM.Process
 
   @reductions 1000
 
@@ -14,6 +14,6 @@ defmodule TestHelpers do
   end
 
   def core_run(tokens, reductions) when is_list(tokens) do
-    Core.run(tokens, Dictionary.new(), reductions)
+    Process.run(tokens, Dictionary.new(), reductions)
   end
 end

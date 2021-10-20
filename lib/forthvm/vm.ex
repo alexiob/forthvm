@@ -1,5 +1,5 @@
 defmodule ForthVM.VM do
-  alias ForthVM.Core
+  alias ForthVM.Process
 
   defstruct name: "", id: 0, cores: []
 
@@ -12,16 +12,16 @@ defmodule ForthVM.VM do
       cores:
         for(
           core_id <- 0..(num_cores - 1),
-          do: ForthVM.Core.new("core-#{id}", core_id)
+          do: Process.new("core-#{id}", core_id)
         )
     }
   end
 
   def add_core(vm = %__MODULE__{cores: cores}, name, core_id) do
-    %{vm | cores: [ForthVM.Core.new(name, core_id) | cores]}
+    %{vm | cores: [Process.new(name, core_id) | cores]}
   end
 
-  def remove_core(vm = %__MODULE__{}, core = %Core{}) do
+  def remove_core(vm = %__MODULE__{}, core = %Process{}) do
     remove_core_by_id(vm, core.id)
   end
 
@@ -37,15 +37,15 @@ defmodule ForthVM.VM do
     %{vm | cores: Enum.map(vm.cores, &run_core(&1, reductions))}
   end
 
-  def run_core(core = %Core{context: context}, reductions) do
-    %{core | context: Core.run(context, reductions)}
+  def run_core(core = %Process{context: context}, reductions) do
+    %{core | context: Process.run(context, reductions)}
   end
 
   def load_core(core, source) when is_binary(source) do
     load_core(core, ForthVM.Tokenizer.parse(source))
   end
 
-  def load_core(core = %Core{context: context}, tokens) when is_list(tokens) do
-    %{core | context: Core.load(context, tokens)}
+  def load_core(core = %Process{context: context}, tokens) when is_list(tokens) do
+    %{core | context: Process.load(context, tokens)}
   end
 end

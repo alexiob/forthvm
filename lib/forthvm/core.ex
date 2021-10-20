@@ -1,5 +1,5 @@
-defmodule ForthVM.Core do
-  import ForthVM.Core.Utils
+defmodule ForthVM.Process do
+  import ForthVM.Utils
 
   defstruct name: "", id: 0, context: {}
   # ---------------------------------------------

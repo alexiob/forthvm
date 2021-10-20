@@ -1,3 +1,3 @@
 defmodule ForthVM.Words.String do
-  # alias ForthVM.Core
+  # alias ForthVM.Process
 end

@@ -1,5 +1,5 @@
 defmodule ForthVM.Words.Data do
-  alias ForthVM.Core
+  alias ForthVM.Process
 
   @doc """
   l[: ( x y z -- l ) collect all tokens till ] is found and store on the data stack as a list
@@ -7,7 +7,7 @@ defmodule ForthVM.Words.Data do
   def list_start(tokens, data_stack, return_stack, dictionary, meta) do
     {list_tokens, tokens, _depth} = collect_list_tokens(tokens, "l[", "]", [], 1)
 
-    Core.next(
+    Process.next(
       tokens,
       [list_tokens | data_stack],
       return_stack,

@@ -1,7 +1,7 @@
 defmodule ForthVM.Words.Interpreter do
-  import ForthVM.Core.Utils
+  import ForthVM.Utils
 
-  alias ForthVM.Core
+  alias ForthVM.Process
   alias ForthVM.Dictionary
   alias ForthVM.Tokenizer
 
@@ -13,14 +13,14 @@ defmodule ForthVM.Words.Interpreter do
   end: ( -- ) ( R: -- ) explicit process termination
   """
   def _end(_tokens, data_stack, return_stack, dictionary, meta) do
-    Core.next([], data_stack, return_stack, dictionary, meta)
+    Process.next([], data_stack, return_stack, dictionary, meta)
   end
 
   @doc """
   abort: ( i * x -- ) ( R: j * x -- ) empty the data stack and perform the function of QUIT, which includes emptying the return stack, without displaying a message.
   """
   def abort(_tokens, _data_stack, _return_stack, dictionary, meta) do
-    Core.next([], [], [], dictionary, meta)
+    Process.next([], [], [], dictionary, meta)
   end
 
   @doc """
@@ -31,7 +31,7 @@ defmodule ForthVM.Words.Interpreter do
       IO.puts(meta.io.device, message)
       abort(tokens, data_stack, return_stack, dictionary, meta)
     else
-      Core.next(tokens, data_stack, return_stack, dictionary, meta)
+      Process.next(tokens, data_stack, return_stack, dictionary, meta)
     end
   end
 
@@ -44,7 +44,7 @@ defmodule ForthVM.Words.Interpreter do
   """
   def sleep(tokens, [ms | data_stack], return_stack, dictionary, meta) do
     till = System.monotonic_time() + System.convert_time_unit(ms, :millisecond, :native)
-    Core.next(tokens, data_stack, return_stack, dictionary, %{meta | sleep: till})
+    Process.next(tokens, data_stack, return_stack, dictionary, %{meta | sleep: till})
   end
 
   # ---------------------------------------------
@@ -57,7 +57,7 @@ defmodule ForthVM.Words.Interpreter do
   def comment(tokens, data_stack, return_stack, dictionary, meta) do
     {_comment_tokens, [")" | tokens]} = Enum.split_while(tokens, fn s -> s != ")" end)
 
-    Core.next(tokens, data_stack, return_stack, dictionary, meta)
+    Process.next(tokens, data_stack, return_stack, dictionary, meta)
   end
 
   # ---------------------------------------------
@@ -71,7 +71,7 @@ defmodule ForthVM.Words.Interpreter do
     # FIXME: implement `is-interpret` and `immediate`
     {word_tokens, [";" | tokens]} = Enum.split_while(tokens, fn s -> s != ";" end)
 
-    Core.next(
+    Process.next(
       tokens,
       data_stack,
       return_stack,
@@ -90,7 +90,7 @@ defmodule ForthVM.Words.Interpreter do
         false -> Dictionary.add_var(dictionary, word_name, nil)
       end
 
-    Core.next(tokens, data_stack, return_stack, dictionary, meta)
+    Process.next(tokens, data_stack, return_stack, dictionary, meta)
   end
 
   @doc """
@@ -102,7 +102,7 @@ defmodule ForthVM.Words.Interpreter do
         raise("can not set unknown variable '#{word_name}' with value '#{inspect(x)}'")
 
       true ->
-        Core.next(
+        Process.next(
           tokens,
           data_stack,
           return_stack,
@@ -122,7 +122,7 @@ defmodule ForthVM.Words.Interpreter do
 
       # FIXME: should handle :undefined ?
       true ->
-        Core.next(
+        Process.next(
           tokens,
           data_stack,
           return_stack,
@@ -145,7 +145,7 @@ defmodule ForthVM.Words.Interpreter do
         raise("can not fetch unknown variable '#{word_name}'")
 
       true ->
-        Core.next(
+        Process.next(
           tokens,
           [Dictionary.get_var(dictionary, word_name) | data_stack],
           return_stack,
@@ -166,7 +166,7 @@ defmodule ForthVM.Words.Interpreter do
         )
 
       false ->
-        Core.next(
+        Process.next(
           tokens,
           data_stack,
           return_stack,
@@ -182,7 +182,7 @@ defmodule ForthVM.Words.Interpreter do
   def include([filename | tokens], data_stack, return_stack, dictionary, meta) do
     case File.read(filename) do
       {:ok, source} ->
-        Core.next(
+        Process.next(
           Tokenizer.parse(source) ++ tokens,
           data_stack,
           return_stack,

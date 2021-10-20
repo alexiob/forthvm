@@ -1,7 +1,7 @@
 defmodule ForthVM.Words.Flow do
-  import ForthVM.Core.Utils
+  import ForthVM.Utils
 
-  alias ForthVM.Core
+  alias ForthVM.Process
 
   # ---------------------------------------------
   # Flow control: start end DO do_stack LOOP
@@ -11,7 +11,7 @@ defmodule ForthVM.Words.Flow do
   do: ( end_count count -- ) start loop declaration
   """
   def _do(tokens, [count, end_count | data_stack], return_stack, dictionary, meta) do
-    Core.next(
+    Process.next(
       tokens,
       data_stack,
       [count, end_count, %{do: tokens} | return_stack],
@@ -30,28 +30,28 @@ defmodule ForthVM.Words.Flow do
         dictionary,
         meta
       ) do
-    Core.next(tokens, [count | data_stack], return_stack, dictionary, meta)
+    Process.next(tokens, [count | data_stack], return_stack, dictionary, meta)
   end
 
   @doc """
   r@: ( -- data )copy the top of the return stack to the data stack
   """
   def copy_r_to_d(tokens, data_stack, [data | _] = return_stack, dictionary, meta) do
-    Core.next(tokens, [data | data_stack], return_stack, dictionary, meta)
+    Process.next(tokens, [data | data_stack], return_stack, dictionary, meta)
   end
 
   @doc """
   >r: ( data -- ) move the top of the data stack to the return stack
   """
   def move_d_to_r(tokens, [data | data_stack], return_stack, dictionary, meta) do
-    Core.next(tokens, data_stack, [data | return_stack], dictionary, meta)
+    Process.next(tokens, data_stack, [data | return_stack], dictionary, meta)
   end
 
   @doc """
   r>: ( -- data ) move the top of the return stack to the data stack
   """
   def move_r_to_d(tokens, data_stack, [data | return_stack], dictionary, meta) do
-    Core.next(tokens, [data | data_stack], return_stack, dictionary, meta)
+    Process.next(tokens, [data | data_stack], return_stack, dictionary, meta)
   end
 
   @doc """
@@ -64,7 +64,7 @@ defmodule ForthVM.Words.Flow do
         dictionary,
         meta
       ) do
-    Core.next(tokens, [data | data_stack], return_stack, dictionary, meta)
+    Process.next(tokens, [data | data_stack], return_stack, dictionary, meta)
   end
 
   @doc """
@@ -81,7 +81,7 @@ defmodule ForthVM.Words.Flow do
 
     case count < end_count do
       true ->
-        Core.next(
+        Process.next(
           do_tokens,
           data_stack,
           [count, end_count, %{do: do_tokens} | return_stack],
@@ -90,7 +90,7 @@ defmodule ForthVM.Words.Flow do
         )
 
       false ->
-        Core.next(tokens, data_stack, return_stack, dictionary, meta)
+        Process.next(tokens, data_stack, return_stack, dictionary, meta)
     end
   end
 
@@ -108,7 +108,7 @@ defmodule ForthVM.Words.Flow do
 
     case count < end_count do
       true ->
-        Core.next(
+        Process.next(
           do_tokens,
           data_stack,
           [count, end_count, %{do: do_tokens} | return_stack],
@@ -117,7 +117,7 @@ defmodule ForthVM.Words.Flow do
         )
 
       false ->
-        Core.next(tokens, data_stack, return_stack, dictionary, meta)
+        Process.next(tokens, data_stack, return_stack, dictionary, meta)
     end
   end
 
@@ -129,7 +129,7 @@ defmodule ForthVM.Words.Flow do
   begin: ( -- ) start loop declaration
   """
   def begin(tokens, data_stack, return_stack, dictionary, meta) do
-    Core.next(tokens, data_stack, [%{begin: tokens} | return_stack], dictionary, meta)
+    Process.next(tokens, data_stack, [%{begin: tokens} | return_stack], dictionary, meta)
   end
 
   @doc """
@@ -144,7 +144,7 @@ defmodule ForthVM.Words.Flow do
       ) do
     case is_falsely(condition) do
       true ->
-        Core.next(
+        Process.next(
           until_tokens,
           data_stack,
           [%{begin: until_tokens} | return_stack],
@@ -153,7 +153,7 @@ defmodule ForthVM.Words.Flow do
         )
 
       false ->
-        Core.next(tokens, data_stack, return_stack, dictionary, meta)
+        Process.next(tokens, data_stack, return_stack, dictionary, meta)
     end
   end
 end

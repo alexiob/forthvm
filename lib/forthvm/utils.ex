@@ -1,4 +1,4 @@
-defmodule ForthVM.Core.Utils do
+defmodule ForthVM.Utils do
   # ---------------------------------------------
   # Custom guards
   # ---------------------------------------------

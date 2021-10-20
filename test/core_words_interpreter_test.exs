@@ -1,4 +1,4 @@
-defmodule ForthVM.CoreWordsInterpreterTest do
+defmodule ForthVM.ProcessWordsInterpreterTest do
   use ExUnit.Case, async: true
   import ExUnit.CaptureIO
   import TestHelpers
@@ -62,11 +62,11 @@ defmodule ForthVM.CoreWordsInterpreterTest do
     assert status == :yield
     assert exit_value == nil
     :timer.sleep(50)
-    {status, context, exit_value} = ForthVM.Core.run(context, 1000)
+    {status, context, exit_value} = ForthVM.Process.run(context, 1000)
     assert status == :yield
     assert exit_value == nil
     :timer.sleep(55)
-    {status, _context, exit_value} = ForthVM.Core.run(context, 1000)
+    {status, _context, exit_value} = ForthVM.Process.run(context, 1000)
     assert status == :exit
     assert exit_value == 42
   end
