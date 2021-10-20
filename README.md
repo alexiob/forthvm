@@ -1,12 +1,14 @@
 # ForthVM
 
-Very simple Forth VM/Interpreter written in Elixir
+Very simple Forth-like VM/Interpreter written in Elixir
+
+## TODO:
 
 - [x] tokenizer
 - [x] interpreter
 - [x] core words
 - [x] loops
-- [x] if-then
+- [x] if-then-else
 - [x] include
 - [x] REPL
 - [x] sleep word

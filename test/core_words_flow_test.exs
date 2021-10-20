@@ -4,20 +4,20 @@ defmodule ForthVM.ProcessWordFlowTest do
   import TestHelpers
 
   test "<CONDITION> if <CODE> else <CODE> then" do
-    assert {:exit, _, 42} = core_run(~s[1 2 < if 42 else 43 then])
-    assert {:exit, _, 42} = core_run(~s[2 1 > if 42 else 43 then])
+    assert {:exit, _, 42} = process_run(~s[1 2 < if 42 else 43 then])
+    assert {:exit, _, 42} = process_run(~s[2 1 > if 42 else 43 then])
   end
 
   test "nested <CONDITION> if <CODE> else <CODE> then" do
-    assert {:exit, _, 1} = core_run(~s[ 5 dup 3 < if 10 else 7 < if 1 else 5 then then ])
+    assert {:exit, _, 1} = process_run(~s[ 5 dup 3 < if 10 else 7 < if 1 else 5 then then ])
   end
 
   test "<CONDITION> if <CODE> then" do
-    assert {:exit, _, 42} = core_run(~s[ 1 2 < if 42 then ])
+    assert {:exit, _, 42} = process_run(~s[ 1 2 < if 42 then ])
   end
 
   test "divide by zero checker" do
-    assert capture_io(fn -> core_run(~s[
+    assert capture_io(fn -> process_run(~s[
     ( numerator denominator -- quotient )
     : /check dup 0= if "invalid" puts drop else / then ;
     5 0 /check
@@ -27,7 +27,7 @@ defmodule ForthVM.ProcessWordFlowTest do
   end
 
   test "eggsize computation with nested if" do
-    assert capture_io(fn -> core_run(~s[
+    assert capture_io(fn -> process_run(~s[
       : eggsize
       dup 18 < if "reject" .      else
       dup 21 < if "small" .       else
@@ -42,31 +42,31 @@ defmodule ForthVM.ProcessWordFlowTest do
 
   test "+loop" do
     assert capture_io(fn ->
-             core_run(~s[ : loop-test 50 0 do i . " " . 5 +loop ; loop-test ])
+             process_run(~s[ : loop-test 50 0 do i . " " . 5 +loop ; loop-test ])
            end) == "0 5 10 15 20 25 30 35 40 45 "
   end
 
   test "emit looped numbers" do
     assert capture_io(fn ->
-             core_run(~s[ 10 0 do i emit loop ])
+             process_run(~s[ 10 0 do i emit loop ])
            end) == <<0, 1, 2, 3, 4, 5, 6, 7, 8, 9>>
   end
 
   test "print looped numbers" do
     assert capture_io(fn ->
-             core_run(~s[ 10 0 do i . " " . loop ])
+             process_run(~s[ 10 0 do i . " " . loop ])
            end) == "0 1 2 3 4 5 6 7 8 9 "
   end
 
   test "print stack (peek)" do
     assert capture_io(fn ->
-             core_run(~s[ 1 2 3 rot .s ])
+             process_run(~s[ 1 2 3 rot .s ])
            end) == "2 3 1 "
   end
 
   test "print stars" do
     assert capture_io(fn ->
-             core_run(~s[
+             process_run(~s[
         : star 42 emit ;
         : stars 0 do star loop ;
         20 stars end
@@ -76,7 +76,7 @@ defmodule ForthVM.ProcessWordFlowTest do
 
   test "do loop test with i" do
     assert capture_io(fn ->
-             core_run(~s[
+             process_run(~s[
         5 0 do i . " " . loop
       ])
            end) == "0 1 2 3 4 "
@@ -84,7 +84,7 @@ defmodule ForthVM.ProcessWordFlowTest do
 
   test "nested loops" do
     assert capture_io(fn ->
-             core_run(~s[
+             process_run(~s[
         : star 42 emit ;
         : dash 45 emit ;
         : stardashes 0 do 2 0 do star loop 2 0 do dash loop loop ;
@@ -95,7 +95,7 @@ defmodule ForthVM.ProcessWordFlowTest do
 
   test "looping negative numbers in a definition" do
     assert capture_io(fn ->
-             core_run(~s[
+             process_run(~s[
         : negative-loop -243 -250 do i . " " . loop ;
         negative-loop
       ])
@@ -104,14 +104,14 @@ defmodule ForthVM.ProcessWordFlowTest do
 
   test "multiplication loop" do
     assert capture_io(fn ->
-             core_run(~s[
+             process_run(~s[
         : multiplications cr 11 1 do dup i * . " " . loop drop ; 7 multiplications
       ])
            end) == "\n7 14 21 28 35 42 49 56 63 70 "
   end
 
   test "quadratic equation using return stack operators" do
-    assert {:exit, _, 48} = core_run(~s[
+    assert {:exit, _, 48} = process_run(~s[
       : quadratic ( a b c x -- n )
       >r swap rot r@ * + r> * + ;
       2 7 9 3 quadratic
@@ -119,7 +119,7 @@ defmodule ForthVM.ProcessWordFlowTest do
   end
 
   test "temperature conversions" do
-    assert {:exit, _, [-279.4, 260.77777777777777]} = core_run(~s[
+    assert {:exit, _, [-279.4, 260.77777777777777]} = process_run(~s[
       : F>C ( fahr -- cels ) 32 - 10 18 */ ;
       : C>F ( cels -- fahr ) 18 10 */ 32 + ;
       : C>K ( cels -- kelv ) 273 + ;
@@ -131,7 +131,7 @@ defmodule ForthVM.ProcessWordFlowTest do
   end
 
   test "variables" do
-    assert capture_io(fn -> core_run(~s[
+    assert capture_io(fn -> process_run(~s[
       : ? @ . " " . ;
       variable DATE
       variable MONTH
@@ -144,7 +144,7 @@ defmodule ForthVM.ProcessWordFlowTest do
   end
 
   test "egg counting" do
-    assert capture_io(fn -> core_run(~s[
+    assert capture_io(fn -> process_run(~s[
       : ? @ . ;
       variable EGGS
       12 constant DOZEN
@@ -161,7 +161,7 @@ defmodule ForthVM.ProcessWordFlowTest do
   end
 
   test "frozen pies" do
-    assert capture_io(fn -> core_run(~s[
+    assert capture_io(fn -> process_run(~s[
       : ? @ . " " . ;
       variable PIES 0 PIES !
       : BAKE-PIE 1 PIES +! ;
