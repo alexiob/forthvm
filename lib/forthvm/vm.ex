@@ -59,8 +59,8 @@ defmodule ForthVM.VM do
         process = Process.new(process_id)
         {%{vm | processes: [process | processes]}, process_id, process}
 
-      state ->
-        state
+      process ->
+        {vm, process.id, process}
     end
   end
 
