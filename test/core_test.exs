@@ -89,4 +89,31 @@ defmodule ForthVM.CoreTest do
     assert process.status == :exit
     assert process.exit_value == 42
   end
+
+  test "Core executing two processes with source_sleep_loop should exit with 42 after sleeping" do
+    core = Core.new()
+    {core, process_1} = Core.spawn_process(core)
+    {core, process_2} = Core.spawn_process(core)
+
+    core =
+      core
+      |> Core.load(process_1.id, @source_sleep_loop)
+      |> Core.load(process_2.id, @source_sleep_loop)
+      |> core_run(fn core ->
+        process = Core.find_process(core, process_2.id)
+
+        case process.status do
+          :exit -> :stop
+          :yield -> :continue
+        end
+      end)
+
+    process = Core.find_process(core, process_1.id)
+    assert process.status == :exit
+    assert process.exit_value == 42
+
+    process = Core.find_process(core, process_2.id)
+    assert process.status == :exit
+    assert process.exit_value == 42
+  end
 end
