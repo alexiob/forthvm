@@ -1,7 +1,7 @@
 defmodule ForthVM.Process do
   import ForthVM.Utils
 
-  defstruct id: "", context: {}
+  defstruct id: nil, context: {}, status: nil, exit_value: nil
 
   # ---------------------------------------------
   # Custom guards
@@ -10,7 +10,9 @@ defmodule ForthVM.Process do
   def new(id \\ nil, dictionary \\ nil) do
     %__MODULE__{
       id: id || System.unique_integer(),
-      context: {[], [], [], dictionary || ForthVM.Dictionary.new(), new_meta()}
+      context: {[], [], [], dictionary || ForthVM.Dictionary.new(), new_meta()},
+      status: nil,
+      exit_value: nil
     }
   end
 

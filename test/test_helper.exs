@@ -4,6 +4,7 @@ defmodule TestHelpers do
   alias ForthVM.Tokenizer
   alias ForthVM.Dictionary
   alias ForthVM.Process
+  alias ForthVM.Core
 
   @reductions 1000
 
@@ -15,5 +16,16 @@ defmodule TestHelpers do
 
   def process_run(tokens, reductions) when is_list(tokens) do
     Process.run(tokens, Dictionary.new(), reductions)
+  end
+
+  def core_run(core, condition, reductions \\ @reductions)
+
+  def core_run(core = %Core{}, condition, reductions) do
+    core = Core.run(core, reductions)
+
+    case condition.(core) do
+      :continue -> core_run(core, condition, reductions)
+      :stop -> core
+    end
   end
 end
