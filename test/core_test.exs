@@ -4,7 +4,6 @@ defmodule ForthVM.CoreTest do
   # import ExUnit.CaptureIO
 
   alias ForthVM.Core
-  alias ForthVM.Process
 
   @source_loop """
   10 0 do

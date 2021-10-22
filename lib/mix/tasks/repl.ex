@@ -4,6 +4,6 @@ defmodule Mix.Tasks.Repl do
   def run(_) do
     IO.puts("ForthVM REPL")
 
-    ForthVM.Repl.run()
+    ForthVM.Repl.Process.run()
   end
 end
