@@ -2,16 +2,16 @@ defmodule ForthVM.Repl.Core do
   @moduledoc """
   Multiprocess REPL
   """
-  alias ForthVM.Core
-  alias ForthVM.Dictionary
-  alias ForthVM.Tokenizer
+  # alias ForthVM.Core
+  # alias ForthVM.Dictionary
+  # alias ForthVM.Tokenizer
 
-  @prompt ">> "
-  @reductions 100
+  # @prompt ">> "
+  # @reductions 100
 
-  def context() do
-    {[], [], [], Dictionary.new(), Process.new_meta()}
-  end
+  # def context() do
+  #   {[], [], [], Dictionary.new(), Process.new_meta()}
+  # end
 
   # def run() do
   #   Core.new()

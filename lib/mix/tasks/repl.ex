@@ -1,5 +1,7 @@
 defmodule Mix.Tasks.Repl do
-  @moduledoc false
+  @moduledoc """
+  ForthVM REPL
+  """
   use Mix.Task
 
   def run(_) do
