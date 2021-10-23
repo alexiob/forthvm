@@ -1,6 +1,8 @@
 ExUnit.start()
 
 defmodule TestHelpers do
+  @moduledoc false
+
   alias ForthVM.Tokenizer
   alias ForthVM.Dictionary
   alias ForthVM.Process
@@ -20,7 +22,7 @@ defmodule TestHelpers do
 
   def core_run(core, condition, reductions \\ @reductions)
 
-  def core_run(core = %Core{}, condition, reductions) do
+  def core_run(%Core{} = core, condition, reductions) do
     core = Core.run(core, reductions)
 
     case condition.(core) do

@@ -1,4 +1,7 @@
 defmodule ForthVM.Core do
+  @moduledoc """
+  Single core able to run multiple processes
+  """
   alias ForthVM.Process
 
   defstruct id: nil, processes: []
@@ -16,11 +19,11 @@ defmodule ForthVM.Core do
     }
   end
 
-  def run(core = %__MODULE__{}, reductions \\ @default_reductions) do
+  def run(%__MODULE__{} = core, reductions \\ @default_reductions) do
     %{core | processes: Enum.map(core.processes, &run_process(&1, reductions))}
   end
 
-  def load(core = %__MODULE__{}, process_id, code)
+  def load(%__MODULE__{} = core, process_id, code)
       when is_binary(process_id) or is_number(process_id) do
     case find_process(core, process_id) do
       # FIXME: should error using VM IO
@@ -33,7 +36,7 @@ defmodule ForthVM.Core do
     end
   end
 
-  def load(core = %__MODULE__{}, process = %Process{}, code) do
+  def load(%__MODULE__{} = core, %Process{} = process, code) do
     process = load_process(process, code)
     replace_process(core, process.id, process)
   end
@@ -46,12 +49,13 @@ defmodule ForthVM.Core do
     Enum.find(processes, fn process -> process.id == process_id end)
   end
 
-  def replace_process(core = %__MODULE__{processes: processes}, process_id, new_process) do
+  def replace_process(%__MODULE__{processes: processes} = core, process_id, new_process) do
     processes =
       Enum.map(processes, fn process ->
-        cond do
-          process.id == process_id -> new_process
-          true -> process
+        if process.id == process_id do
+          new_process
+        else
+          process
         end
       end)
 
@@ -59,7 +63,7 @@ defmodule ForthVM.Core do
   end
 
   def spawn_process(
-        core = %__MODULE__{processes: processes},
+        %__MODULE__{processes: processes} = core,
         process_id \\ nil,
         dictionary \\ nil
       ) do
@@ -73,24 +77,24 @@ defmodule ForthVM.Core do
     end
   end
 
-  def kill_process(core = %__MODULE__{}, process = %Process{}) do
+  def kill_process(%__MODULE__{} = core, %Process{} = process) do
     kill_process(core, process.id)
   end
 
-  def kill_process(core = %__MODULE__{processes: processes}, process_id) do
+  def kill_process(%__MODULE__{processes: processes} = core, process_id) do
     %{core | processes: Enum.reject(processes, fn process -> process.id == process_id end)}
   end
 
-  def run_process(process = %Process{context: context}, reductions) do
+  def run_process(%Process{context: context} = process, reductions) do
     {status, context, exit_value} = Process.run(context, reductions)
     %{process | context: context, status: status, exit_value: exit_value}
   end
 
-  def load_process(process = %Process{}, source) when is_binary(source) do
+  def load_process(%Process{} = process, source) when is_binary(source) do
     load_process(process, ForthVM.Tokenizer.parse(source))
   end
 
-  def load_process(process = %Process{context: context}, tokens) when is_list(tokens) do
+  def load_process(%Process{context: context} = process, tokens) when is_list(tokens) do
     %{process | context: Process.load(context, tokens)}
   end
 end

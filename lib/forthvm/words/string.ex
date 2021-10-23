@@ -1,3 +1,5 @@
 defmodule ForthVM.Words.String do
-  # alias ForthVM.Process
+  @moduledoc """
+  String words
+  """
 end

@@ -1,4 +1,8 @@
 defmodule ForthVM.Words.IO do
+  @moduledoc """
+  IO words
+  """
+
   alias ForthVM.Process
 
   # ---------------------------------------------

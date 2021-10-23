@@ -1,4 +1,8 @@
 defmodule ForthVM.Words.Math do
+  @moduledoc """
+  Math words
+  """
+
   alias ForthVM.Process
 
   # ---------------------------------------------

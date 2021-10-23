@@ -1,7 +1,7 @@
 defmodule ForthVM.Dictionary do
-  # ---------------------------------------------
-  # Dictionary utilities
-  # ---------------------------------------------
+  @moduledoc """
+  Dictionary utilities
+  """
 
   def get(dictionary, word_name) do
     case Map.has_key?(dictionary, word_name) do
@@ -72,9 +72,10 @@ defmodule ForthVM.Dictionary do
       Regex.named_captures(~r/^\s*(?<name>.+)\s*\:\s*(?<stack>\([^)]*\))+\s*(?<doc>.*)?$/, doc)
 
     word_name =
-      cond do
-        Regex.match?(~r/^\"(.*)\"$/, word_name) -> String.trim(word_name, "\"")
-        true -> word_name
+      if Regex.match?(~r/^\"(.*)\"$/, word_name) do
+        String.trim(word_name, "\"")
+      else
+        word_name
       end
 
     # IO.puts(

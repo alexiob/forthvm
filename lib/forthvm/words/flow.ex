@@ -1,4 +1,8 @@
 defmodule ForthVM.Words.Flow do
+  @moduledoc """
+  Flow words
+  """
+
   import ForthVM.Utils
 
   alias ForthVM.Process

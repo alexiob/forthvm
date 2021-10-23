@@ -1,4 +1,5 @@
 defmodule Mix.Tasks.Repl do
+  @moduledoc false
   use Mix.Task
 
   def run(_) do

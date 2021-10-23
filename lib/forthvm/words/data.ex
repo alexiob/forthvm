@@ -1,4 +1,8 @@
 defmodule ForthVM.Words.Data do
+  @moduledoc """
+  Custom data words
+  """
+
   alias ForthVM.Process
 
   @doc """

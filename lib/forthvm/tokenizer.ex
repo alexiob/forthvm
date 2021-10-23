@@ -1,5 +1,5 @@
 defmodule ForthVM.Tokenizer do
-  @doc """
+  @moduledoc """
   Parse a text source
   """
   def parse(source) when is_binary(source) do

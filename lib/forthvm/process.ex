@@ -1,4 +1,7 @@
 defmodule ForthVM.Process do
+  @moduledoc """
+  A Forth processing instance
+  """
   import ForthVM.Utils
 
   defstruct id: nil, context: {}, status: nil, exit_value: nil
@@ -35,7 +38,7 @@ defmodule ForthVM.Process do
   # ---------------------------------------------
 
   # run program described by tokens, using the provided dictionary, for, at max, number of reductions
-  def run(tokens, dictionary = %{}, reductions) do
+  def run(tokens, %{} = dictionary, reductions) do
     process(tokens, [], [], dictionary, %{new_meta() | reductions: reductions})
   end
 
@@ -144,33 +147,25 @@ defmodule ForthVM.Process do
     next(tokens, data_stack, return_stack, dictionary, %{meta | debug: false})
   end
 
+  def process(["inspect" | tokens], data_stack, return_stack, dictionary, meta) do
+    IO.puts("<------------------------------ INSPECT ------------------------------------")
+    IO.puts("Remaining instructions:")
+    IO.inspect(tokens, limit: :infinity)
+    IO.puts("Data stack:")
+    IO.inspect(data_stack, limit: :infinity)
+    IO.puts("Return stack:")
+    IO.inspect(return_stack, limit: :infinity)
+    IO.puts("Dictionary:")
+    IO.inspect(dictionary, limit: :infinity)
+    IO.puts("Meta:")
+    IO.inspect(meta, limit: :infinity)
+    IO.puts("<---------------------------------------------------------------------------")
+
+    next(tokens, data_stack, return_stack, dictionary, meta)
+  end
+
   def process(["debug-dump-word", word_name | tokens], data_stack, return_stack, dictionary, meta) do
-    {type, code, doc} =
-      case get_dictionary_word(dictionary, word_name) do
-        # function: execute function
-        {:word, function, meta} when is_function(function) ->
-          {"function", function, Map.get(meta, :doc)}
-
-        # tokens
-        {:word, word_tokens, meta} when is_list(word_tokens) ->
-          {"word", word_tokens, Map.get(meta, :doc)}
-
-        # variable
-        {:var, value} ->
-          {"var", value, nil}
-
-        # constant
-        {:const, value} ->
-          {"const", value, nil}
-
-        # unknown
-        {:unknown_word, value} ->
-          {"unknown", value, nil}
-
-        # invalid: should never happen
-        invalid ->
-          {"unknown", inspect(invalid, limit: :infinity), nil}
-      end
+    {type, code, doc} = dump_word(get_dictionary_word(dictionary, word_name))
 
     padding = 16
     IO.puts("<--------------------------------- WORD ------------------------------------")
@@ -188,23 +183,6 @@ defmodule ForthVM.Process do
     end
 
     IO.inspect(code, label: String.pad_trailing("< def", padding))
-    IO.puts("<---------------------------------------------------------------------------")
-
-    next(tokens, data_stack, return_stack, dictionary, meta)
-  end
-
-  def process(["inspect" | tokens], data_stack, return_stack, dictionary, meta) do
-    IO.puts("<------------------------------ INSPECT ------------------------------------")
-    IO.puts("Remaining instructions:")
-    IO.inspect(tokens, limit: :infinity)
-    IO.puts("Data stack:")
-    IO.inspect(data_stack, limit: :infinity)
-    IO.puts("Return stack:")
-    IO.inspect(return_stack, limit: :infinity)
-    IO.puts("Dictionary:")
-    IO.inspect(dictionary, limit: :infinity)
-    IO.puts("Meta:")
-    IO.inspect(meta, limit: :infinity)
     IO.puts("<---------------------------------------------------------------------------")
 
     next(tokens, data_stack, return_stack, dictionary, meta)
@@ -339,47 +317,15 @@ defmodule ForthVM.Process do
       when is_binary(word_name) do
     # process word
     result =
-      case get_dictionary_word(dictionary, word_name) do
-        # function: execute function
-        {:word, function, word_meta} when is_function(function) ->
-          try do
-            function.(tokens, data_stack, return_stack, dictionary, meta)
-          rescue
-            _e in FunctionClauseError ->
-              message = "processing word '#{word_name}' #{word_meta.doc}"
-              error(message, {tokens, data_stack, return_stack, dictionary, meta})
-
-            e ->
-              error(e.message, {tokens, data_stack, return_stack, dictionary, meta})
-          end
-
-        # tokens: add tokens at beginning of current tokens
-        {:word, word_tokens, _} when is_list(word_tokens) ->
-          {word_tokens ++ tokens, data_stack, return_stack, dictionary, meta}
-
-        # variable: store the name on top of stack
-        {:var, _} ->
-          {tokens, [word_name | data_stack], return_stack, dictionary, meta}
-
-        # constant: copy value on top of data stack
-        {:const, value} ->
-          {tokens, [value | data_stack], return_stack, dictionary, meta}
-
-        # unknown: copy value on top of data stack
-        {:unknown_word, value} ->
-          {tokens, [value | data_stack], return_stack, dictionary, meta}
-
-        # error: print message and exit
-        {:error, context, message} ->
-          error(message, context)
-
-        # invalid: should never happen
-        invalid ->
-          error(
-            "invalid word definition: #{inspect(invalid, limit: :infinity)}",
-            {tokens, data_stack, return_stack, dictionary, meta}
-          )
-      end
+      process_word(
+        get_dictionary_word(dictionary, word_name),
+        word_name,
+        tokens,
+        data_stack,
+        return_stack,
+        dictionary,
+        meta
+      )
 
     # handle responses
     case result do
@@ -389,5 +335,127 @@ defmodule ForthVM.Process do
       result ->
         result
     end
+  end
+
+  def process_word(
+        {:word, function, word_meta},
+        word_name,
+        tokens,
+        data_stack,
+        return_stack,
+        dictionary,
+        meta
+      )
+      when is_function(function) do
+    try do
+      function.(tokens, data_stack, return_stack, dictionary, meta)
+    rescue
+      _e in FunctionClauseError ->
+        message = "processing word '#{word_name}' #{word_meta.doc}"
+        error(message, {tokens, data_stack, return_stack, dictionary, meta})
+
+      e ->
+        error(e.message, {tokens, data_stack, return_stack, dictionary, meta})
+    end
+  end
+
+  def process_word(
+        {:word, word_tokens, _},
+        _word_name,
+        tokens,
+        data_stack,
+        return_stack,
+        dictionary,
+        meta
+      )
+      when is_list(word_tokens) do
+    # tokens: add tokens at beginning of current tokens
+    {word_tokens ++ tokens, data_stack, return_stack, dictionary, meta}
+  end
+
+  def process_word({:var, _}, word_name, tokens, data_stack, return_stack, dictionary, meta) do
+    # variable: store the name on top of stack
+    {tokens, [word_name | data_stack], return_stack, dictionary, meta}
+  end
+
+  def process_word(
+        {:const, value},
+        _word_name,
+        tokens,
+        data_stack,
+        return_stack,
+        dictionary,
+        meta
+      ) do
+    # constant: copy value on top of data stack
+    {tokens, [value | data_stack], return_stack, dictionary, meta}
+  end
+
+  def process_word(
+        {:unknown_word, value},
+        _word_name,
+        tokens,
+        data_stack,
+        return_stack,
+        dictionary,
+        meta
+      ) do
+    # unknown: copy value on top of data stack
+    {tokens, [value | data_stack], return_stack, dictionary, meta}
+  end
+
+  def process_word(
+        {:error, context, message},
+        _word_name,
+        _tokens,
+        _data_stack,
+        _return_stack,
+        _dictionary,
+        _meta
+      ) do
+    # error: print message and exit
+    error(message, context)
+  end
+
+  def process_word(invalid, _word_name, tokens, data_stack, return_stack, dictionary, meta) do
+    # invalid: should never happen
+    error(
+      "invalid word definition: #{inspect(invalid, limit: :infinity)}",
+      {tokens, data_stack, return_stack, dictionary, meta}
+    )
+  end
+
+  # ---------------------------------------------
+  # PRIVATE
+  # ---------------------------------------------
+
+  defp dump_word({:word, function, meta}) when is_function(function) do
+    # functions
+    {"function", function, Map.get(meta, :doc)}
+  end
+
+  defp dump_word({:word, word_tokens, meta}) when is_list(word_tokens) do
+    # tokens
+    {"word", word_tokens, Map.get(meta, :doc)}
+  end
+
+  defp dump_word({:var, value}) do
+    # variable
+    {"var", value, nil}
+  end
+
+  defp dump_word({:const, value}) do
+    # constant
+    {"const", value, nil}
+  end
+
+  defp dump_word({:unknown_word, value}) do
+    # unknown
+    {"unknown", value, nil}
+  end
+
+  defp dump_word(invalid) do
+    # invalid: should never happen
+    {"unknown", inspect(invalid, limit: :infinity), nil}
   end
 end

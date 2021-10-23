@@ -1,4 +1,7 @@
 defmodule ForthVM.Repl.Process do
+  @moduledoc """
+  A single process REPL
+  """
   alias ForthVM.Process
   alias ForthVM.Dictionary
   alias ForthVM.Tokenizer

@@ -1,4 +1,8 @@
 defmodule ForthVM.Words.Stack do
+  @moduledoc """
+  Stack words
+  """
+
   alias ForthVM.Process
 
   import ForthVM.Utils

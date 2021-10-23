@@ -1,4 +1,8 @@
 defmodule ForthVM.Words.Logic do
+  @moduledoc """
+  Comparison, logic and bitwise words
+  """
+
   import ForthVM.Utils
 
   alias ForthVM.Process

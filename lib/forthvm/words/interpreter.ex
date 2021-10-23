@@ -1,4 +1,8 @@
 defmodule ForthVM.Words.Interpreter do
+  @moduledoc """
+  Interpreter words
+  """
+
   import ForthVM.Utils
 
   alias ForthVM.Process
