@@ -17,8 +17,9 @@ defmodule ForthVM.Repl.Process do
     loop(context())
   end
 
-  def loop(context) do
-    input = IO.gets(@prompt)
+  def loop({_, _, _, _, meta} = context) do
+    io = meta.io.device
+    input = IO.gets(io, @prompt)
     tokens = Tokenizer.parse(input)
 
     loop(process(tokens, context))
@@ -29,17 +30,19 @@ defmodule ForthVM.Repl.Process do
     process({command_tokens ++ tokens, data_stack, return_stack, dictionary, meta})
   end
 
-  def process(context) do
+  def process({_, _, _, _, meta} = context) do
+    io = meta.io.device
+
     case Process.run(context, @reductions) do
       {:exit, context, value} ->
         if value != nil do
-          IO.inspect(value)
+          IO.inspect(io, value)
         end
 
         loop(context)
 
       {:error, context, message} ->
-        IO.puts("> Error #{message}")
+        IO.puts(io, "> Error #{message}")
 
         loop(context)
 

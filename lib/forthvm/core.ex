@@ -4,18 +4,20 @@ defmodule ForthVM.Core do
   """
   alias ForthVM.Process
 
-  defstruct id: nil, processes: []
+  defstruct id: nil, processes: [], io: nil
 
   @default_reductions 1000
+  @core_io_device_name "core_io"
 
   # ---------------------------------------------
   # VM
   # ---------------------------------------------
 
-  def new(id \\ nil) do
+  def new(id \\ nil, io \\ :stdio) do
     %__MODULE__{
       id: id || System.unique_integer(),
-      processes: []
+      processes: [],
+      io: io
     }
   end
 
@@ -23,12 +25,11 @@ defmodule ForthVM.Core do
     %{core | processes: Enum.map(core.processes, &run_process(&1, reductions))}
   end
 
-  def load(%__MODULE__{} = core, process_id, code)
+  def load(%__MODULE__{io: io} = core, process_id, code)
       when is_binary(process_id) or is_number(process_id) do
     case find_process(core, process_id) do
-      # FIXME: should error using VM IO
       nil ->
-        IO.puts("Unknown process #{process_id}")
+        IO.puts(io, "Unknown process #{process_id}")
         core
 
       process ->
@@ -63,13 +64,17 @@ defmodule ForthVM.Core do
   end
 
   def spawn_process(
-        %__MODULE__{processes: processes} = core,
+        %__MODULE__{processes: processes, io: io} = core,
         process_id \\ nil,
         dictionary \\ nil
       ) do
     case find_process(core, process_id) do
       nil ->
-        process = Process.new(process_id, dictionary)
+        process =
+          Process.new(process_id, dictionary)
+          |> Process.add_io_device(@core_io_device_name, io)
+          |> Process.set_io_device(@core_io_device_name)
+
         {%{core | processes: [process | processes]}, process}
 
       process ->

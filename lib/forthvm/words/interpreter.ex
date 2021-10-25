@@ -198,4 +198,107 @@ defmodule ForthVM.Words.Interpreter do
         raise("can not include '#{filename}' because '#{inspect(file_error)}'")
     end
   end
+
+  # ---------------------------------------------
+  # Debug
+  # ---------------------------------------------
+
+  @doc """
+  debug-enable: ( -- ) set process debug flag to true.
+  """
+  def debug_enable(tokens, data_stack, return_stack, dictionary, meta) do
+    Process.next(tokens, data_stack, return_stack, dictionary, %{meta | debug: true})
+  end
+
+  @doc """
+  debug-disable: ( -- ) set process debug flag to false.
+  """
+  def debug_disable(tokens, data_stack, return_stack, dictionary, meta) do
+    Process.next(tokens, data_stack, return_stack, dictionary, %{meta | debug: false})
+  end
+
+  @doc """
+  inspect: ( -- ) prints process contex: tokens, data stack, return stack, dictionary, meta.
+  """
+  def inspec(tokens, data_stack, return_stack, dictionary, meta) do
+    io = meta.io.device
+
+    IO.puts(io, "<------------------------------ INSPECT ------------------------------------")
+    IO.puts(io, "Remaining instructions:")
+    IO.inspect(io, tokens, limit: :infinity)
+    IO.puts(io, "Data stack:")
+    IO.inspect(io, data_stack, limit: :infinity)
+    IO.puts(io, "Return stack:")
+    IO.inspect(io, return_stack, limit: :infinity)
+    IO.puts(io, "Dictionary:")
+    IO.inspect(io, dictionary, limit: :infinity)
+    IO.puts(io, "Meta:")
+    IO.inspect(io, meta, limit: :infinity)
+    IO.puts(io, "<---------------------------------------------------------------------------")
+
+    Process.next(tokens, data_stack, return_stack, dictionary, meta)
+  end
+
+  @doc """
+  debug-dump-word: ( -- ) prints the definition of the word specified in the next token.
+  """
+  def debug_dump_word([word_name | tokens], data_stack, return_stack, dictionary, meta) do
+    io = meta.io.device
+
+    {type, code, doc} = dump_word(ForthVM.Dictionary.get(dictionary, word_name))
+
+    padding = 16
+    IO.puts(io, "<--------------------------------- WORD ------------------------------------")
+    IO.inspect(io, word_name, label: String.pad_trailing("< name", padding))
+    IO.inspect(io, type, label: String.pad_trailing("< type", padding))
+
+    if is_map(doc) do
+      if Map.get(doc, :stack) do
+        IO.inspect(io, doc.stack, label: String.pad_trailing("< stack", padding))
+      end
+
+      if Map.get(doc, :doc) do
+        IO.inspect(io, doc.doc, label: String.pad_trailing("< doc", padding))
+      end
+    end
+
+    IO.inspect(io, code, label: String.pad_trailing("< def", padding))
+    IO.puts(io, "<---------------------------------------------------------------------------")
+
+    Process.next(tokens, data_stack, return_stack, dictionary, meta)
+  end
+
+  # ---------------------------------------------
+  # PRIVATE
+  # ---------------------------------------------
+
+  defp dump_word({:word, function, meta}) when is_function(function) do
+    # functions
+    {"function", function, Map.get(meta, :doc)}
+  end
+
+  defp dump_word({:word, word_tokens, meta}) when is_list(word_tokens) do
+    # tokens
+    {"word", word_tokens, Map.get(meta, :doc)}
+  end
+
+  defp dump_word({:var, value}) do
+    # variable
+    {"var", value, nil}
+  end
+
+  defp dump_word({:const, value}) do
+    # constant
+    {"const", value, nil}
+  end
+
+  defp dump_word({:unknown_word, value}) do
+    # unknown
+    {"unknown", value, nil}
+  end
+
+  defp dump_word(invalid) do
+    # invalid: should never happen
+    {"unknown", inspect(invalid, limit: :infinity), nil}
+  end
 end

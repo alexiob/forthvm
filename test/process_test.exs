@@ -49,4 +49,14 @@ defmodule ForthVM.ProcessTest do
              |> ForthVM.Process.run(1000)
            end) == "*** Hello wonderful world! ***\n"
   end
+
+  test "setting Process IO should work" do
+    process =
+      Process.new()
+      |> Process.add_io_device("test_io", :test_io)
+      |> Process.set_io_device("test_io")
+
+    assert Process.get_io_device(process, "test_io") == :test_io
+    assert Process.get_active_io_device(process) == :test_io
+  end
 end

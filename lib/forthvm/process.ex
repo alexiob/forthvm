@@ -88,21 +88,6 @@ defmodule ForthVM.Process do
   end
 
   # ---------------------------------------------
-  # Handle sleep
-  # ---------------------------------------------
-
-  # ---------------------------------------------
-  # Dictionary utilities
-  # ---------------------------------------------
-
-  defp get_dictionary_word(dictionary, word_name) do
-    case Map.has_key?(dictionary, word_name) do
-      true -> dictionary[word_name]
-      false -> {:unknown_word, word_name}
-    end
-  end
-
-  # ---------------------------------------------
   # Process instructions
   # ---------------------------------------------
 
@@ -128,64 +113,6 @@ defmodule ForthVM.Process do
   # no more tokens but data in the stack
   def process([], data_stack, return_stack, dictionary, meta) do
     exit([], data_stack, return_stack, dictionary, meta, data_stack)
-  end
-
-  # # word: end
-  # def process(["end" | _ ], data_stack, return_stack, dictionary, meta) do
-  #   next([], data_stack, return_stack, dictionary, meta)
-  # end
-
-  # ---------------------------------------------
-  # Debug
-  # ---------------------------------------------
-
-  def process(["debug-enable" | tokens], data_stack, return_stack, dictionary, meta) do
-    next(tokens, data_stack, return_stack, dictionary, %{meta | debug: true})
-  end
-
-  def process(["debug-disable" | tokens], data_stack, return_stack, dictionary, meta) do
-    next(tokens, data_stack, return_stack, dictionary, %{meta | debug: false})
-  end
-
-  def process(["inspect" | tokens], data_stack, return_stack, dictionary, meta) do
-    IO.puts("<------------------------------ INSPECT ------------------------------------")
-    IO.puts("Remaining instructions:")
-    IO.inspect(tokens, limit: :infinity)
-    IO.puts("Data stack:")
-    IO.inspect(data_stack, limit: :infinity)
-    IO.puts("Return stack:")
-    IO.inspect(return_stack, limit: :infinity)
-    IO.puts("Dictionary:")
-    IO.inspect(dictionary, limit: :infinity)
-    IO.puts("Meta:")
-    IO.inspect(meta, limit: :infinity)
-    IO.puts("<---------------------------------------------------------------------------")
-
-    next(tokens, data_stack, return_stack, dictionary, meta)
-  end
-
-  def process(["debug-dump-word", word_name | tokens], data_stack, return_stack, dictionary, meta) do
-    {type, code, doc} = dump_word(get_dictionary_word(dictionary, word_name))
-
-    padding = 16
-    IO.puts("<--------------------------------- WORD ------------------------------------")
-    IO.inspect(word_name, label: String.pad_trailing("< name", padding))
-    IO.inspect(type, label: String.pad_trailing("< type", padding))
-
-    if is_map(doc) do
-      if Map.get(doc, :stack) do
-        IO.inspect(doc.stack, label: String.pad_trailing("< stack", padding))
-      end
-
-      if Map.get(doc, :doc) do
-        IO.inspect(doc.doc, label: String.pad_trailing("< doc", padding))
-      end
-    end
-
-    IO.inspect(code, label: String.pad_trailing("< def", padding))
-    IO.puts("<---------------------------------------------------------------------------")
-
-    next(tokens, data_stack, return_stack, dictionary, meta)
   end
 
   # ---------------------------------------------
@@ -318,7 +245,7 @@ defmodule ForthVM.Process do
     # process word
     result =
       process_word(
-        get_dictionary_word(dictionary, word_name),
+        ForthVM.Dictionary.get(dictionary, word_name),
         word_name,
         tokens,
         data_stack,
@@ -426,36 +353,48 @@ defmodule ForthVM.Process do
   end
 
   # ---------------------------------------------
-  # PRIVATE
+  # IO
   # ---------------------------------------------
 
-  defp dump_word({:word, function, meta}) when is_function(function) do
-    # functions
-    {"function", function, Map.get(meta, :doc)}
+  def add_io_device(
+        %__MODULE__{context: {tokens, data_stack, return_stack, dictionary, meta}} = process,
+        device_name,
+        device
+      ) do
+    devices = Map.put(meta.io.devices, device_name, device)
+
+    meta = %{
+      meta
+      | io: Map.put(meta.io, :devices, devices)
+    }
+
+    %{process | context: {tokens, data_stack, return_stack, dictionary, meta}}
   end
 
-  defp dump_word({:word, word_tokens, meta}) when is_list(word_tokens) do
-    # tokens
-    {"word", word_tokens, Map.get(meta, :doc)}
+  def set_io_device(
+        %__MODULE__{context: {tokens, data_stack, return_stack, dictionary, meta}} = process,
+        device_name
+      ) do
+    device = Map.get(meta.io.devices, device_name, meta.io.device)
+
+    meta = %{
+      meta
+      | io: Map.put(meta.io, :device, device)
+    }
+
+    %{process | context: {tokens, data_stack, return_stack, dictionary, meta}}
   end
 
-  defp dump_word({:var, value}) do
-    # variable
-    {"var", value, nil}
+  def get_io_device(
+        %__MODULE__{context: {_tokens, _data_stack, _return_stack, _dictionary, meta}},
+        device_name
+      ) do
+    Map.get(meta.io.devices, device_name, meta.io.device)
   end
 
-  defp dump_word({:const, value}) do
-    # constant
-    {"const", value, nil}
-  end
-
-  defp dump_word({:unknown_word, value}) do
-    # unknown
-    {"unknown", value, nil}
-  end
-
-  defp dump_word(invalid) do
-    # invalid: should never happen
-    {"unknown", inspect(invalid, limit: :infinity), nil}
+  def get_active_io_device(%__MODULE__{
+        context: {_tokens, _data_stack, _return_stack, _dictionary, meta}
+      }) do
+    meta.io.device
   end
 end

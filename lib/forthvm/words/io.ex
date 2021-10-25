@@ -21,10 +21,12 @@ defmodule ForthVM.Words.IO do
       ) do
     device = Map.get(devices, device_name, device)
 
-    Process.next(tokens, data_stack, return_stack, dictionary, %{
+    meta = %{
       meta
       | io: Map.put(meta.io, :device, device)
-    })
+    }
+
+    Process.next(tokens, data_stack, return_stack, dictionary, meta)
   end
 
   @doc """
