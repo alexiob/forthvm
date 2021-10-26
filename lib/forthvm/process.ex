@@ -47,6 +47,15 @@ defmodule ForthVM.Process do
     process(tokens, data_stack, return_stack, dictionary, %{meta | reductions: reductions})
   end
 
+  # run program defined in the provided context plus the ones passed to the function, for, at max, number of reductions
+  def execute({tokens, data_stack, return_stack, dictionary, meta}, new_tokens, reductions)
+      when is_list(new_tokens) do
+    process(tokens ++ new_tokens, data_stack, return_stack, dictionary, %{
+      meta
+      | reductions: reductions
+    })
+  end
+
   # load a program into the process
   def load({_tokens, _data_stack, _return_stack, dictionary, meta}, tokens) do
     {tokens, [], [], dictionary, %{meta | sleep: 0, reductions: 0}}

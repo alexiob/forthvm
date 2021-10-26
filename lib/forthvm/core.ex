@@ -10,7 +10,7 @@ defmodule ForthVM.Core do
   @core_io_device_name "core_io"
 
   # ---------------------------------------------
-  # VM
+  # Core
   # ---------------------------------------------
 
   def new(id \\ nil, io \\ :stdio) do
@@ -19,6 +19,14 @@ defmodule ForthVM.Core do
       processes: [],
       io: io
     }
+  end
+
+  def core_id(id) when is_binary(id) do
+    id
+  end
+
+  def core_id(id) do
+    "core_#{id}"
   end
 
   def run(%__MODULE__{} = core, reductions \\ @default_reductions) do
@@ -39,6 +47,23 @@ defmodule ForthVM.Core do
 
   def load(%__MODULE__{} = core, %Process{} = process, code) do
     process = load_process(process, code)
+    replace_process(core, process.id, process)
+  end
+
+  def execute(%__MODULE__{io: io} = core, process_id, code)
+      when is_binary(process_id) or is_number(process_id) do
+    case find_process(core, process_id) do
+      nil ->
+        IO.puts(io, "Unknown process #{process_id}")
+        core
+
+      process ->
+        execute(core, process, code)
+    end
+  end
+
+  def execute(%__MODULE__{} = core, %Process{} = process, code, reductions \\ @default_reductions) do
+    process = execute_process(process, code, reductions)
     replace_process(core, process.id, process)
   end
 
@@ -101,5 +126,15 @@ defmodule ForthVM.Core do
 
   def load_process(%Process{context: context} = process, tokens) when is_list(tokens) do
     %{process | context: Process.load(context, tokens)}
+  end
+
+  def execute_process(%Process{} = process, source, reductions) when is_binary(source) do
+    execute_process(process, ForthVM.Tokenizer.parse(source), reductions)
+  end
+
+  def execute_process(%Process{context: context} = process, tokens, reductions)
+      when is_list(tokens) do
+    {status, context, exit_value} = Process.execute(context, tokens, reductions)
+    %{process | context: context, status: status, exit_value: exit_value}
   end
 end
