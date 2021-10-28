@@ -4,10 +4,8 @@ defmodule ForthVM.IOCapture do
   """
   use GenServer
 
-  @name "io_capture"
-
   def start_link(state) do
-    GenServer.start_link(__MODULE__, state, name: via_tuple(@name))
+    GenServer.start_link(__MODULE__, state, name: via_tuple(ForthVM.IOCapture))
   end
 
   def via_tuple(id) do
@@ -24,7 +22,7 @@ defmodule ForthVM.IOCapture do
   # ---------------------------------------------
 
   def pid() do
-    [{io_capture_pid, _io_capture}] = Registry.lookup(ForthVM.Registry, @name)
+    [{io_capture_pid, _io_capture}] = Registry.lookup(ForthVM.Registry, ForthVM.IOCapture)
     io_capture_pid
   end
 

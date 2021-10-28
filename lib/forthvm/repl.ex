@@ -8,7 +8,7 @@ defmodule ForthVM.Repl do
   @repl_process "repl"
 
   def run() do
-    {:ok, app_pid} = ForthVM.Application.start(nil, num_cores: @repl_num_cores)
+    {:ok, _app_pid} = ForthVM.Application.start(nil, num_cores: @repl_num_cores)
 
     ForthVM.Application.spawn(@repl_core, @repl_process)
 

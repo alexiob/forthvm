@@ -47,7 +47,7 @@ defmodule ForthVM.Process do
     process(tokens, data_stack, return_stack, dictionary, %{meta | reductions: reductions})
   end
 
-  # run program defined in the provided context plus the ones passed to the function, for, at max, number of reductions
+  # run program defined in the provided context plus the new tokens passed to the function, for, at max, number of reductions
   def execute({tokens, data_stack, return_stack, dictionary, meta}, new_tokens, reductions)
       when is_list(new_tokens) do
     process(tokens ++ new_tokens, data_stack, return_stack, dictionary, %{
@@ -110,8 +110,8 @@ defmodule ForthVM.Process do
   # ---------------------------------------------
 
   # no more tokens, one last value in the data stack
-  def process([], [last_value], return_stack, dictionary, meta) do
-    exit([], [], return_stack, dictionary, meta, last_value)
+  def process([], [last_value] = data_stack, return_stack, dictionary, meta) do
+    exit([], data_stack, return_stack, dictionary, meta, last_value)
   end
 
   # no more tokens or data
@@ -280,7 +280,7 @@ defmodule ForthVM.Process do
         data_stack,
         return_stack,
         dictionary,
-        meta
+        %{io: %{device: device}} = meta
       )
       when is_function(function) do
     try do
@@ -288,10 +288,14 @@ defmodule ForthVM.Process do
     rescue
       _e in FunctionClauseError ->
         message = "processing word '#{word_name}' #{word_meta.doc}"
-        error(message, {tokens, data_stack, return_stack, dictionary, meta})
+        error(message, {tokens, data_stack, return_stack, dictionary, meta}, device)
+
+      e in Protocol.UndefinedError ->
+        message = "undefined protocol '#{inspect(e.protocol)}' for value '#{inspect(e.value)}"
+        error(message, {tokens, data_stack, return_stack, dictionary, meta}, device)
 
       e ->
-        error(e.message, {tokens, data_stack, return_stack, dictionary, meta})
+        error(e.message, {tokens, data_stack, return_stack, dictionary, meta}, device)
     end
   end
 
@@ -347,17 +351,26 @@ defmodule ForthVM.Process do
         _data_stack,
         _return_stack,
         _dictionary,
-        _meta
+        %{io: %{device: device}} = _meta
       ) do
     # error: print message and exit
-    error(message, context)
+    error(message, context, device)
   end
 
-  def process_word(invalid, _word_name, tokens, data_stack, return_stack, dictionary, meta) do
+  def process_word(
+        invalid,
+        _word_name,
+        tokens,
+        data_stack,
+        return_stack,
+        dictionary,
+        %{io: %{device: device}} = meta
+      ) do
     # invalid: should never happen
     error(
       "invalid word definition: #{inspect(invalid, limit: :infinity)}",
-      {tokens, data_stack, return_stack, dictionary, meta}
+      {tokens, data_stack, return_stack, dictionary, meta},
+      device
     )
   end
 

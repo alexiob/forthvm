@@ -92,4 +92,22 @@ defmodule ForthVM.Dictionary do
     IO.inspect(doc, label: ">>> IGNORED WORD DEF")
     dictionary
   end
+
+  def print_word_doc(dictionary, device, word_name, width \\ nil) do
+    width = width || String.length(word_name)
+
+    case Map.get(dictionary, word_name) do
+      {:word, _word, doc} ->
+        IO.puts(device, "[w] #{String.pad_trailing(word_name, width)} #{doc.stack} - #{doc.doc}")
+
+      {:var, _value} ->
+        IO.puts(device, "[v] #{String.pad_trailing(word_name, width)}")
+
+      {:const, _value} ->
+        IO.puts(device, "[c] #{String.pad_trailing(word_name, width)}")
+
+      _ ->
+        nil
+    end
+  end
 end

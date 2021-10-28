@@ -19,7 +19,7 @@ defmodule ForthVM.Worker do
 
   @impl true
   def init(id: id, io: io) do
-    [{io_capture_pid, _}] = Registry.lookup(ForthVM.Registry, "io_capture")
+    [{io_capture_pid, _}] = Registry.lookup(ForthVM.Registry, ForthVM.IOCapture)
 
     # we want to capture all IO and send it to interested subscribers
     Process.group_leader(self(), io_capture_pid)
@@ -34,12 +34,12 @@ defmodule ForthVM.Worker do
   # API
   # ---------------------------------------------
 
-  def execute(pid, process_id, source) do
-    GenServer.call(pid, {:execute, process_id, source})
+  def execute(pid, process_id, source, dictionary \\ nil) do
+    GenServer.call(pid, {:execute, process_id, source, dictionary})
   end
 
-  def spawn(pid, process_id) do
-    GenServer.call(pid, {:spawn, process_id})
+  def spawn(pid, process_id, dictionary \\ nil) do
+    GenServer.call(pid, {:spawn, process_id, dictionary})
   end
 
   def load(pid, process_id, source) do
@@ -51,16 +51,16 @@ defmodule ForthVM.Worker do
   # ---------------------------------------------
 
   @impl true
-  def handle_call({:execute, process_id, source}, _from, core) do
-    {core, process} = ForthVM.Core.spawn_process(core, process_id)
+  def handle_call({:execute, process_id, source, dictionary}, _from, core) do
+    {core, process} = ForthVM.Core.spawn_process(core, process_id, dictionary)
     core = ForthVM.Core.execute(core, process.id, source)
 
     {:reply, core, core}
   end
 
   @impl true
-  def handle_call({:spawn, process_id}, _from, core) do
-    {core, process} = ForthVM.Core.spawn_process(core, process_id)
+  def handle_call({:spawn, process_id, dictionary}, _from, core) do
+    {core, process} = ForthVM.Core.spawn_process(core, process_id, dictionary)
 
     {:reply, process, core}
   end

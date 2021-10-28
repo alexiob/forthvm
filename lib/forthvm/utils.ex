@@ -11,7 +11,8 @@ defmodule ForthVM.Utils do
   # Error handling
   # ---------------------------------------------
 
-  def error(message, context) do
+  def error(message, context, device \\ :stdio) do
+    IO.puts(device, "Error: #{message}")
     {:error, context, message}
   end
 

@@ -10,6 +10,43 @@ defmodule ForthVM.Words.Interpreter do
   alias ForthVM.Tokenizer
 
   # ---------------------------------------------
+  # Help
+  # ---------------------------------------------
+
+  @doc """
+  dictionary: ( -- ) ( -- ) print list of words in dictionary
+  """
+  def dictionary(tokens, data_stack, return_stack, dictionary, %{io: %{device: device}} = meta) do
+    width =
+      Enum.max_by(Map.keys(dictionary), fn name ->
+        String.length(name)
+      end)
+      |> String.length()
+
+    Map.keys(dictionary)
+    |> Enum.sort()
+    |> Enum.each(fn name ->
+      Dictionary.print_word_doc(dictionary, device, name, width)
+    end)
+
+    Process.next(tokens, data_stack, return_stack, dictionary, meta)
+  end
+
+  @doc """
+  help: ( -- ) ( -- ) print description of dictionary's word/var/const specified as the next token
+  """
+  def help(
+        [word_name | tokens],
+        data_stack,
+        return_stack,
+        dictionary,
+        %{io: %{device: device}} = meta
+      ) do
+    Dictionary.print_word_doc(dictionary, device, word_name)
+    Process.next(tokens, data_stack, return_stack, dictionary, meta)
+  end
+
+  # ---------------------------------------------
   # Process exit conditions
   # ---------------------------------------------
 

@@ -25,7 +25,7 @@ defmodule ForthVM.IOLogger do
 
   @impl true
   def handle_info(
-        {:command_stdout, string, encoding},
+        {:command_stdout, string, _encoding},
         state
       ) do
     IO.puts(string)

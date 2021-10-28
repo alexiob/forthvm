@@ -14,7 +14,7 @@ defmodule ForthVM.Application do
       {ForthVM.Supervisor, num_cores: num_cores}
     ]
 
-    IO.inspect(children, label: ">>> ForthVM.Application.children")
+    # IO.inspect(children, label: ">>> ForthVM.Application.children")
 
     opts = [strategy: :one_for_one, name: ForthVM]
 
@@ -27,15 +27,15 @@ defmodule ForthVM.Application do
     core_pid
   end
 
-  def execute(core_id, process_id, source) do
-    ForthVM.Worker.execute(core_pid(core_id), process_id, source)
+  def execute(core_id, process_id, source, dictionary \\ nil) do
+    ForthVM.Worker.execute(core_pid(core_id), process_id, source, dictionary)
   end
 
   def load(core_id, process_id, source) do
     ForthVM.Worker.load(core_pid(core_id), process_id, source)
   end
 
-  def spawn(core_id, process_id) do
-    ForthVM.Worker.spawn(core_pid(core_id), process_id)
+  def spawn(core_id, process_id, dictionary \\ nil) do
+    ForthVM.Worker.spawn(core_pid(core_id), process_id, dictionary)
   end
 end
