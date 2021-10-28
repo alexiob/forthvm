@@ -8,7 +8,7 @@ defmodule TestHelpers do
   alias ForthVM.Process
   alias ForthVM.Core
 
-  @reductions 1000
+  @reductions 1_000
 
   def process_run(source, reductions \\ @reductions)
 

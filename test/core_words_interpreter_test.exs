@@ -63,17 +63,28 @@ defmodule ForthVM.ProcessWordsInterpreterTest do
     assert status == :yield
     assert exit_value == nil
     :timer.sleep(50)
-    {status, context, exit_value} = ForthVM.Process.run(context, 1000)
+    {status, context, exit_value} = ForthVM.Process.run(context, 1_000)
     assert status == :yield
     assert exit_value == nil
     :timer.sleep(55)
-    {status, _context, exit_value} = ForthVM.Process.run(context, 1000)
+    {status, _context, exit_value} = ForthVM.Process.run(context, 1_000)
     assert status == :exit
     assert exit_value == 42
   end
 
   test "define variable, set value, increment value, get value" do
     assert {:exit, _, 42} = process_run("variable test 41 test ! 1 test +! test @")
+  end
+
+  test "re-define variable should just return previously defined one" do
+    assert {:exit, context, 42} = process_run("variable test 42 test ! test @")
+
+    assert {:exit, _context, 42} =
+             ForthVM.Process.execute(
+               context,
+               ForthVM.Tokenizer.parse("variable test"),
+               1000
+             )
   end
 
   test "set an undefined variable should error" do

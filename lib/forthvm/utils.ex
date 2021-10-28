@@ -4,6 +4,7 @@ defmodule ForthVM.Utils do
   # ---------------------------------------------
   # Custom guards
   # ---------------------------------------------
+
   defguard is_falsely(value) when value == false or value == nil or value == 0 or value == ""
   defguard is_truthly(value) when not is_falsely(value)
 

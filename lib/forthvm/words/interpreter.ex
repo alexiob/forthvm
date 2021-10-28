@@ -109,7 +109,7 @@ defmodule ForthVM.Words.Interpreter do
   ":": ( -- ) convert all tokens till ";" is found into a new word
   """
   def create([word_name | tokens], data_stack, return_stack, dictionary, meta) do
-    # FIXME: implement `is-interpret` and `immediate`
+    # TODO: implement `is-interpret` and `immediate`
     {word_tokens, [";" | tokens]} = Enum.split_while(tokens, fn s -> s != ";" end)
 
     Process.next(

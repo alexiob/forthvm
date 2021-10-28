@@ -47,7 +47,7 @@ defmodule ForthVM.ProcessTest do
              process = ForthVM.Process.new()
 
              ForthVM.Process.load(process.context, ForthVM.Tokenizer.parse(@source_2))
-             |> ForthVM.Process.run(1000)
+             |> ForthVM.Process.run(1_000)
            end) == "*** Hello wonderful world! ***\n"
   end
 

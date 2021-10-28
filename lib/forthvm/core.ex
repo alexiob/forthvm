@@ -6,7 +6,7 @@ defmodule ForthVM.Core do
 
   defstruct id: nil, processes: [], io: nil
 
-  @default_reductions 1000
+  @default_reductions 1_000
   @core_io_device_name "core_io"
 
   # ---------------------------------------------

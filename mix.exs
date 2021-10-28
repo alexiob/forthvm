@@ -38,7 +38,8 @@ defmodule ForthVM.MixProject do
     [
       {:credo, "~> 1.5", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
-      {:excoveralls, "~> 0.10", only: :test}
+      {:excoveralls, "~> 0.10", only: :test},
+      {:rexbug, ">= 1.0.0", only: :test}
     ]
   end
 end

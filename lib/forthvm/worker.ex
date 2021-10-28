@@ -19,10 +19,14 @@ defmodule ForthVM.Worker do
 
   @impl true
   def init(id: id, io: io) do
-    [{io_capture_pid, _}] = Registry.lookup(ForthVM.Registry, ForthVM.IOCapture)
+    case Registry.lookup(ForthVM.Registry, ForthVM.IOCapture) do
+      [{io_capture_pid, _}] ->
+        # we want to capture all IO and send it to interested subscribers
+        Process.group_leader(self(), io_capture_pid)
 
-    # we want to capture all IO and send it to interested subscribers
-    Process.group_leader(self(), io_capture_pid)
+      _ ->
+        nil
+    end
 
     # schedule processing
     tick()

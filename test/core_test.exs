@@ -20,12 +20,43 @@ defmodule ForthVM.CoreTest do
   42
   """
 
+  test "core_id should return a string" do
+    assert Core.core_id(1) == "core_1"
+    assert Core.core_id("core_1") == "core_1"
+  end
+
   test "Core can find a process by id" do
     core = Core.new()
     {core, process} = Core.spawn_process(core)
     found_process = Core.find_process(core, process.id)
 
     assert process.id == found_process.id
+  end
+
+  test "Core does not spawn a process with same id" do
+    core = Core.new()
+    {core, process_1} = Core.spawn_process(core)
+    {_core, process_2} = Core.spawn_process(core, process_1.id)
+    assert process_1.id == process_2.id
+  end
+
+  test "Core kills a process" do
+    core = Core.new()
+    {core, process} = Core.spawn_process(core)
+    found_process = Core.find_process(core, process.id)
+
+    assert found_process.id == process.id
+
+    core = Core.kill_process(core, process.id)
+    found_process = Core.find_process(core, process.id)
+
+    assert found_process == nil
+
+    {core, process} = Core.spawn_process(core)
+    core = Core.kill_process(core, process)
+    found_process = Core.find_process(core, process.id)
+
+    assert found_process == nil
   end
 
   test "Core executing source_loop should exit with 42" do

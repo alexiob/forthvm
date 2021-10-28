@@ -13,7 +13,6 @@ defmodule ForthVM.Tokenizer do
     source
     |> Enum.map(&parse_line(&1))
     |> List.flatten()
-    |> convert_labels_to_absolute()
   end
 
   @doc """
@@ -101,48 +100,5 @@ defmodule ForthVM.Tokenizer do
     rescue
       _ -> {:next}
     end
-  end
-
-  @doc """
-  Convert labels to absolute values
-  """
-  def convert_labels_to_absolute(tokens) do
-    acc = %{idx: 0, tokens: [], labels: %{}}
-
-    %{tokens: tokens, labels: labels} = Enum.reduce(tokens, acc, &collect_labels(&1, &2))
-
-    tokens
-    |> List.flatten()
-    |> Enum.reverse()
-    |> convert_labels(labels)
-  end
-
-  def collect_labels(token, acc) do
-    case token do
-      "::" <> name when is_binary(name) and name != "" ->
-        %{acc | labels: Map.put_new(acc.labels, name, acc.idx)}
-
-      token ->
-        %{acc | tokens: [token | acc.tokens], idx: acc.idx + 1}
-    end
-  end
-
-  def convert_labels(tokens, labels) do
-    tokens
-    |> Enum.with_index()
-    |> Enum.map(fn {token, idx} ->
-      case token do
-        ":" <> name when is_binary(name) and name != "" ->
-          label_to_idx(Map.get(labels, name), idx)
-
-        token ->
-          token
-      end
-    end)
-  end
-
-  def label_to_idx(label_idx, idx) do
-    # IO.puts(">>>CALC label_idx=#{label_idx} - idx=#{idx}")
-    label_idx - (idx + 1)
   end
 end
