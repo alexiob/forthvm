@@ -1,4 +1,5 @@
 defmodule ForthVM.TokenizerTest do
+  @moduledoc false
   use ExUnit.Case
 
   alias ForthVM.Tokenizer
@@ -16,18 +17,18 @@ defmodule ForthVM.TokenizerTest do
     tokens = Tokenizer.parse(source)
 
     assert tokens == [
-      ":",
-      "hello-world",
-      "hello world",
-      42,
-      4.2,
-      "print",
-      ";",
-      "hello-world",
-      "string",
-      true,
-      false,
-      nil
-    ]
+             ":",
+             "hello-world",
+             "hello world",
+             42,
+             4.2,
+             "print",
+             ";",
+             "hello-world",
+             "string",
+             true,
+             false,
+             nil
+           ]
   end
 end

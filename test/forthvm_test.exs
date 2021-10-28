@@ -1,4 +1,5 @@
 defmodule ForthVMTest do
+  @moduledoc false
   use ExUnit.Case
   doctest ForthVM
 

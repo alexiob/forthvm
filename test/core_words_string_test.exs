@@ -1,4 +1,5 @@
 defmodule ForthVM.ProcessWordStringTest do
+  @moduledoc false
   use ExUnit.Case, async: true
   import TestHelpers
 

@@ -1,5 +1,7 @@
 defmodule ForthVM.ProcessWordLogicTest do
+  @moduledoc false
   use ExUnit.Case, async: true
+  import ExUnit.CaptureIO
   import TestHelpers
 
   test "= numbers" do
@@ -311,7 +313,10 @@ defmodule ForthVM.ProcessWordLogicTest do
   end
 
   test "'48' & 42 should error" do
-    assert {:error, _, "bad argument in arithmetic expression"} = process_run(["48", 42, "&"])
+    assert capture_io(fn ->
+             assert {:error, _, "bad argument in arithmetic expression"} =
+                      process_run(["48", 42, "&"])
+           end) == "Error: bad argument in arithmetic expression\n"
   end
 
   test "0 | 1 should be 1" do

@@ -1,4 +1,5 @@
 defmodule ForthVM.ProcessWordsInterpreterTest do
+  @moduledoc false
   use ExUnit.Case, async: true
   import ExUnit.CaptureIO
   import TestHelpers
@@ -76,17 +77,23 @@ defmodule ForthVM.ProcessWordsInterpreterTest do
   end
 
   test "set an undefined variable should error" do
-    assert {:error, _, "can not set unknown variable 'test' with value '42'"} =
-             process_run("42 test !")
+    assert capture_io(fn ->
+             assert {:error, _, "can not set unknown variable 'test' with value '42'"} =
+                      process_run("42 test !")
+           end) == "Error: can not set unknown variable 'test' with value '42'\n"
   end
 
   test "increment an undefined variable should error" do
-    assert {:error, _, "can not increment unknown variable 'test' by '42'"} =
-             process_run("42 test +!")
+    assert capture_io(fn ->
+             assert {:error, _, "can not increment unknown variable 'test' by '42'"} =
+                      process_run("42 test +!")
+           end) == "Error: can not increment unknown variable 'test' by '42'\n"
   end
 
   test "fetch an undefined variable should error" do
-    assert {:error, _, "can not fetch unknown variable 'test'"} = process_run("test @")
+    assert capture_io(fn ->
+             assert {:error, _, "can not fetch unknown variable 'test'"} = process_run("test @")
+           end) == "Error: can not fetch unknown variable 'test'\n"
   end
 
   test "define constant, get value" do
@@ -94,8 +101,10 @@ defmodule ForthVM.ProcessWordsInterpreterTest do
   end
 
   test "setting an already defined constant should error" do
-    assert {:error, _, "can not set already defined constant 'test' with new value '1'"} =
-             process_run("42 constant test 1 constant test")
+    assert capture_io(fn ->
+             assert {:error, _, "can not set already defined constant 'test' with new value '1'"} =
+                      process_run("42 constant test 1 constant test")
+           end) == "Error: can not set already defined constant 'test' with new value '1'\n"
   end
 
   test "include a file" do
@@ -106,7 +115,9 @@ defmodule ForthVM.ProcessWordsInterpreterTest do
   end
 
   test "include an unknown file sould error" do
-    assert {:error, _, "can not include 'unknown.forth' because ':enoent'"} =
-             process_run(~w[include unknown.forth hello-world])
+    assert capture_io(fn ->
+             assert {:error, _, "can not include 'unknown.forth' because ':enoent'"} =
+                      process_run(~w[include unknown.forth hello-world])
+           end) == "Error: can not include 'unknown.forth' because ':enoent'\n"
   end
 end

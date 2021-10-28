@@ -1,4 +1,5 @@
 defmodule ForthVM.ProcessTest do
+  @moduledoc false
   use ExUnit.Case, async: true
   import TestHelpers
   import ExUnit.CaptureIO
