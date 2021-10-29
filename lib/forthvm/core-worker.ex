@@ -1,4 +1,4 @@
-defmodule ForthVM.Worker do
+defmodule ForthVM.Core.Worker do
   @moduledoc """
   Core supervised worker
   """
@@ -19,9 +19,9 @@ defmodule ForthVM.Worker do
 
   @impl true
   def init(id: id, io: io) do
+    # we want to capture all IO and send it to interested subscribers
     case Registry.lookup(ForthVM.Registry, ForthVM.IOCapture) do
       [{io_capture_pid, _}] ->
-        # we want to capture all IO and send it to interested subscribers
         Process.group_leader(self(), io_capture_pid)
 
       _ ->

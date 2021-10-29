@@ -13,9 +13,13 @@ defmodule ForthVM.Core.Supervisor do
     children =
       Enum.map(1..num_cores, fn id ->
         core_id = String.to_atom(ForthVM.Core.core_id(id))
-        Supervisor.child_spec({ForthVM.Worker, id: id}, id: core_id)
+        Supervisor.child_spec({ForthVM.Core.Worker, id: id}, id: core_id)
       end)
 
     Supervisor.init(children, strategy: :one_for_one)
+  end
+
+  def cores(pid) do
+    Supervisor.which_children(pid)
   end
 end

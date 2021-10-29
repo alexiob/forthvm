@@ -26,15 +26,21 @@ defmodule ForthVM.Supervisor do
     core_pid
   end
 
+  def cores() do
+    Supervisor.which_children(Process.whereis(ForthVM.Core.Supervisor))
+    |> Enum.map(fn {core_id, core_pid, _, _} -> {core_id, core_pid} end)
+    |> Enum.into(%{})
+  end
+
   def execute(core_id, process_id, source, dictionary \\ nil) do
-    ForthVM.Worker.execute(core_pid(core_id), process_id, source, dictionary)
+    ForthVM.Core.Worker.execute(core_pid(core_id), process_id, source, dictionary)
   end
 
   def load(core_id, process_id, source) do
-    ForthVM.Worker.load(core_pid(core_id), process_id, source)
+    ForthVM.Core.Worker.load(core_pid(core_id), process_id, source)
   end
 
   def spawn(core_id, process_id, dictionary \\ nil) do
-    ForthVM.Worker.spawn(core_pid(core_id), process_id, dictionary)
+    ForthVM.Core.Worker.spawn(core_pid(core_id), process_id, dictionary)
   end
 end
