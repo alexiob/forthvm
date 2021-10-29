@@ -8,9 +8,6 @@ defmodule ForthVM.Application do
   @impl true
   def start(_type, num_cores: num_cores) do
     children = [
-      {Registry, keys: :unique, name: ForthVM.Registry},
-      {ForthVM.IOCapture, io_subscribers: []},
-      ForthVM.IOLogger,
       {ForthVM.Supervisor, num_cores: num_cores}
     ]
 
@@ -21,21 +18,8 @@ defmodule ForthVM.Application do
     Supervisor.start_link(children, opts)
   end
 
-  def core_pid(core_id) do
-    [{core_pid, _core_module}] = Registry.lookup(ForthVM.Registry, ForthVM.Core.core_id(core_id))
-
-    core_pid
-  end
-
-  def execute(core_id, process_id, source, dictionary \\ nil) do
-    ForthVM.Worker.execute(core_pid(core_id), process_id, source, dictionary)
-  end
-
-  def load(core_id, process_id, source) do
-    ForthVM.Worker.load(core_pid(core_id), process_id, source)
-  end
-
-  def spawn(core_id, process_id, dictionary \\ nil) do
-    ForthVM.Worker.spawn(core_pid(core_id), process_id, dictionary)
-  end
+  defdelegate core_pid(core_id), to: ForthVM.Supervisor
+  defdelegate execute(core_id, process_id, source, dictionary \\ nil), to: ForthVM.Supervisor
+  defdelegate load(core_id, process_id, source), to: ForthVM.Supervisor
+  defdelegate spawn(core_id, process_id, dictionary \\ nil), to: ForthVM.Supervisor
 end
