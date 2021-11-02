@@ -12,6 +12,8 @@ defmodule ForthVM.Supervisor do
   def init(num_cores: num_cores) do
     children = [
       {Registry, keys: :unique, name: ForthVM.Registry},
+      {Registry,
+       keys: :duplicate, name: ForthVM.Subscriptions, partitions: System.schedulers_online()},
       {ForthVM.IOCapture, io_subscribers: []},
       ForthVM.IOLogger,
       {ForthVM.Core.Supervisor, num_cores: num_cores}

@@ -4,8 +4,12 @@ defmodule ForthVM.IOCapture do
   """
   use GenServer
 
-  def start_link(state) do
-    GenServer.start_link(__MODULE__, state, name: via_tuple(ForthVM.IOCapture))
+  def start_link(_init_args) do
+    start_link()
+  end
+
+  def start_link() do
+    GenServer.start_link(__MODULE__, {}, name: via_tuple(ForthVM.IOCapture))
   end
 
   def via_tuple(id) do
@@ -13,8 +17,8 @@ defmodule ForthVM.IOCapture do
   end
 
   @impl true
-  def init(io_subscribers: io_subscribers) do
-    {:ok, %{io_subscribers: io_subscribers}}
+  def init(_init_args) do
+    {:ok, %{}}
   end
 
   # ---------------------------------------------
@@ -26,28 +30,12 @@ defmodule ForthVM.IOCapture do
     io_capture_pid
   end
 
-  def register(io_subscriber_pid) do
-    GenServer.call(pid(), {:register, io_subscriber_pid})
+  def register() do
+    Registry.register(ForthVM.Subscriptions, :io_subscribers, [])
   end
 
-  def unregister(io_subscriber_pid) do
-    GenServer.call(pid(), {:unregister, io_subscriber_pid})
-  end
-
-  # ---------------------------------------------
-  # API Handler
-  # ---------------------------------------------
-
-  @impl true
-  def handle_call({:register, process_id}, _from, %{io_subscribers: io_subscribers} = state) do
-    state = %{state | io_subscribers: [process_id | io_subscribers]}
-    {:reply, state, state}
-  end
-
-  @impl true
-  def handle_call({:unregister, process_id}, _from, %{io_subscribers: io_subscribers} = state) do
-    state = %{state | io_subscribers: Enum.reject(io_subscribers, &Kernel.==(&1, process_id))}
-    {:reply, state, state}
+  def unregister() do
+    Registry.unregister(ForthVM.Subscriptions, :io_subscribers)
   end
 
   # ---------------------------------------------
@@ -57,20 +45,20 @@ defmodule ForthVM.IOCapture do
   @impl true
   def handle_info(
         {:io_request, pid, reply_as, {:put_chars, encoding, string}},
-        %{io_subscribers: io_subscribers} = state
+        state
       ) do
     # IO.inspect(string, label: ">>> io_request.string")
 
     send(pid, {:io_reply, reply_as, :ok})
-    notify_io_subscribers(io_subscribers, {:command_stdout, string, encoding})
+    notify_io_subscribers({:command_stdout, string, encoding})
 
     {:noreply, state}
   end
 
-  def handle_info({:render, content}, %{io_subscribers: io_subscribers} = state) do
+  def handle_info({:render, content}, state) do
     IO.inspect(content, label: ">>> render")
 
-    notify_io_subscribers(io_subscribers, {:command_output, %{outputs: content}})
+    notify_io_subscribers({:command_output, %{outputs: content}})
 
     {:noreply, state}
   end
@@ -92,12 +80,16 @@ defmodule ForthVM.IOCapture do
   # Utilities
   # ---------------------------------------------
 
-  defp notify_io_subscribers(io_subscribers, data) do
+  def notify_io_subscribers(data) when not is_tuple(data) do
+    notify_io_subscribers({:command_stdout, data, nil})
+  end
+
+  def notify_io_subscribers(data) do
     # IO.inspect(io_subscribers, label: "notify_io_subscribers")
     # IO.inspect(data, label: "notify_io_subscribers.data")
 
-    io_subscribers
-    |> Stream.each(fn pid -> send(pid, data) end)
-    |> Stream.run()
+    Registry.dispatch(ForthVM.Subscriptions, :io_subscribers, fn entries ->
+      for {pid, _} <- entries, do: send(pid, data)
+    end)
   end
 end

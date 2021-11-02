@@ -14,7 +14,7 @@ defmodule ForthVM.IOLogger do
 
   @impl true
   def init(_state) do
-    ForthVM.IOCapture.register(self())
+    ForthVM.IOCapture.register()
 
     {:ok, %{}}
   end
