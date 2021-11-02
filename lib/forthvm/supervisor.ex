@@ -14,7 +14,7 @@ defmodule ForthVM.Supervisor do
       {Registry, keys: :unique, name: ForthVM.Registry},
       {Registry,
        keys: :duplicate, name: ForthVM.Subscriptions, partitions: System.schedulers_online()},
-      {ForthVM.IOCapture, io_subscribers: []},
+      ForthVM.IOCapture,
       ForthVM.IOLogger,
       {ForthVM.Core.Supervisor, num_cores: num_cores}
     ]

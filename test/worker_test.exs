@@ -12,7 +12,7 @@ defmodule ForthVM.Core.WorkerTest do
         partitions: System.schedulers_online()
       )
 
-    {:ok, _io_capture__pid} = ForthVM.IOCapture.start_link()
+    {:ok, _io_capture__pid} = ForthVM.IOCapture.start_link([])
 
     {:ok, worker_pid} = ForthVM.Core.Worker.start_link(id: 1)
 

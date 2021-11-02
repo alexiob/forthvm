@@ -5,15 +5,11 @@ defmodule ForthVM.IOCapture do
   use GenServer
 
   def start_link(_init_args) do
-    start_link()
-  end
-
-  def start_link() do
-    GenServer.start_link(__MODULE__, {}, name: via_tuple(ForthVM.IOCapture))
+    GenServer.start_link(__MODULE__, {}, name: via_tuple(__MODULE__))
   end
 
   def via_tuple(id) do
-    {:via, Registry, {ForthVM.Registry, id, ForthVM.IOCapture}}
+    {:via, Registry, {ForthVM.Registry, id, __MODULE__}}
   end
 
   @impl true
@@ -26,7 +22,7 @@ defmodule ForthVM.IOCapture do
   # ---------------------------------------------
 
   def pid() do
-    [{io_capture_pid, _io_capture}] = Registry.lookup(ForthVM.Registry, ForthVM.IOCapture)
+    [{io_capture_pid, _io_capture}] = Registry.lookup(ForthVM.Registry, __MODULE__)
     io_capture_pid
   end
 
@@ -56,7 +52,7 @@ defmodule ForthVM.IOCapture do
   end
 
   def handle_info({:render, content}, state) do
-    IO.inspect(content, label: ">>> render")
+    # IO.inspect(content, label: ">>> render")
 
     notify_io_subscribers({:command_output, %{outputs: content}})
 
@@ -64,14 +60,14 @@ defmodule ForthVM.IOCapture do
   end
 
   def handle_info({:finish, pid}, state) do
-    IO.inspect(pid, label: ">>> finish")
+    # IO.inspect(pid, label: ">>> finish")
     send(pid, {:finished})
 
     {:noreply, state}
   end
 
   def handle_info(unknown, state) do
-    IO.inspect(unknown, label: ">>> unknown")
+    # IO.inspect(unknown, label: ">>> unknown")
 
     {:noreply, state}
   end
