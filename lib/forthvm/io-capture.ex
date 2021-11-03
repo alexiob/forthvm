@@ -66,7 +66,7 @@ defmodule ForthVM.IOCapture do
     {:noreply, state}
   end
 
-  def handle_info(unknown, state) do
+  def handle_info(_unknown, state) do
     # IO.inspect(unknown, label: ">>> unknown")
 
     {:noreply, state}
