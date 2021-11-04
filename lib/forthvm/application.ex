@@ -11,8 +11,6 @@ defmodule ForthVM.Application do
       {ForthVM.Supervisor, num_cores: num_cores}
     ]
 
-    # IO.inspect(children, label: ">>> ForthVM.Application.children")
-
     opts = [strategy: :one_for_one, name: ForthVM]
 
     Supervisor.start_link(children, opts)

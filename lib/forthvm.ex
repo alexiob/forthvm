@@ -3,16 +3,18 @@ defmodule ForthVM do
   Documentation for `ForthVM`.
   """
 
-  @doc """
-  Hello world.
+  def start(num_cores: num_cores) do
+    children = [
+      {ForthVM.Supervisor, num_cores: num_cores}
+    ]
 
-  ## Examples
+    opts = [strategy: :one_for_one, name: ForthVM]
 
-      iex> ForthVM.hello()
-      :world
-
-  """
-  def hello do
-    :world
+    Supervisor.start_link(children, opts)
   end
+
+  defdelegate core_pid(core_id), to: ForthVM.Supervisor
+  defdelegate execute(core_id, process_id, source, dictionary \\ nil), to: ForthVM.Supervisor
+  defdelegate load(core_id, process_id, source), to: ForthVM.Supervisor
+  defdelegate spawn(core_id, process_id, dictionary \\ nil), to: ForthVM.Supervisor
 end
