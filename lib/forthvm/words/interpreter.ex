@@ -51,6 +51,13 @@ defmodule ForthVM.Words.Interpreter do
   # ---------------------------------------------
 
   @doc """
+  exit: ( -- ) ( -- ) explicit VM termination
+  """
+  def exit(_tokens, _data_stack, _return_stack, _dictionary, _meta) do
+    exit(:normal)
+  end
+
+  @doc """
   end: ( -- ) ( R: -- ) explicit process termination
   """
   def _end(_tokens, data_stack, return_stack, dictionary, meta) do

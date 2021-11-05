@@ -8,9 +8,9 @@ defmodule ForthVM.Repl do
   @repl_process "repl"
 
   def run() do
-    {:ok, _app_pid} = ForthVM.Application.start(nil, num_cores: @repl_num_cores)
+    {:ok, _app_pid} = ForthVM.start(num_cores: @repl_num_cores)
 
-    ForthVM.Application.spawn(@repl_core, @repl_process)
+    ForthVM.spawn(@repl_core, @repl_process)
 
     loop()
   end
@@ -18,7 +18,7 @@ defmodule ForthVM.Repl do
   def loop() do
     input = IO.gets(@prompt)
 
-    ForthVM.Application.execute(@repl_core, @repl_process, input)
+    ForthVM.execute(@repl_core, @repl_process, input)
 
     loop()
   end
