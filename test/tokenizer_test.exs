@@ -4,6 +4,14 @@ defmodule ForthVM.TokenizerTest do
 
   alias ForthVM.Tokenizer
 
+  test "split_line should handle strings correctly" do
+    assert ["a", "b\n c\n", "d", "e\n"] == Tokenizer.split_line(~s[a "b\n c\n" d "e\n"])
+    assert ["b\n c\n"] == Tokenizer.split_line(~s["b\n c\n"])
+
+    assert ["*** Hello wonderful world! ***\n", "puts"] ==
+             Tokenizer.split_line(~s["*** Hello wonderful world! ***\n" puts])
+  end
+
   test "Tokenizer should work" do
     source = """
     : hello-world

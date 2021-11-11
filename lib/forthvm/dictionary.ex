@@ -78,10 +78,6 @@ defmodule ForthVM.Dictionary do
         word_name
       end
 
-    # IO.puts(
-    #   ">>> CAPTURING: #{function}:#{arity} -> name=#{word_name} stack=#{word_stack} doc=#{word_doc}"
-    # )
-
     add(dictionary, word_name, Function.capture(module, function, arity), %{
       stack: word_stack,
       doc: word_doc
@@ -98,13 +94,13 @@ defmodule ForthVM.Dictionary do
 
     case Map.get(dictionary, word_name) do
       {:word, _word, doc} ->
-        IO.puts(device, "[w] #{String.pad_trailing(word_name, width)} #{doc.stack} - #{doc.doc}")
+        IO.write(device, "[w] #{String.pad_trailing(word_name, width)} #{doc.stack} - #{doc.doc}")
 
       {:var, _value} ->
-        IO.puts(device, "[v] #{String.pad_trailing(word_name, width)}")
+        IO.write(device, "[v] #{String.pad_trailing(word_name, width)}")
 
       {:const, _value} ->
-        IO.puts(device, "[c] #{String.pad_trailing(word_name, width)}")
+        IO.write(device, "[c] #{String.pad_trailing(word_name, width)}")
 
       _ ->
         nil

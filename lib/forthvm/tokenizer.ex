@@ -3,8 +3,7 @@ defmodule ForthVM.Tokenizer do
   Parse a text source
   """
   def parse(source) when is_binary(source) do
-    source
-    |> String.split("\n")
+    [source]
     |> parse()
   end
 
@@ -35,7 +34,10 @@ defmodule ForthVM.Tokenizer do
   """
   def split_line(line) do
     Regex.split(~r{\s+|"(?:\\"|[^"])+"}, String.trim(line), include_captures: true)
-    |> Enum.map(fn s -> s |> String.trim() |> String.trim("\"") end)
+    |> Enum.map(fn s ->
+      # TODO: why I need to convert the "\\n" to "\n"?
+      s |> String.trim() |> String.trim("\"") |> String.replace("\\n", "\n")
+    end)
     |> Enum.filter(fn s -> s != "" end)
   end
 

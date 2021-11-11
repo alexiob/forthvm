@@ -5,7 +5,8 @@ defmodule Mix.Tasks.Repl do
   use Mix.Task
 
   def run(_) do
-    IO.puts("ForthVM REPL")
+    {:ok, version} = :application.get_key(:forthvm, :vsn)
+    IO.puts("ForthVM REPL (v#{version})")
 
     ForthVM.Repl.run()
   end

@@ -13,6 +13,6 @@ defmodule ForthVMTest do
              } = ForthVM.execute(1, nil, "42 puts")
 
              assert core_id == 1
-           end) == "42\n\n"
+           end) == "42\n"
   end
 end

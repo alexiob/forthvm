@@ -19,10 +19,10 @@ defmodule ForthVM.Core.WorkerTest do
     ForthVM.IOCapture.register()
 
     ForthVM.Core.Worker.execute(worker_pid, 1, "\"hello world\" puts")
-    assert_receive {:command_stdout, "hello world\n", _encoding}, 1_000
+    assert_receive {:command_stdout, "hello world", _encoding}, 1_000
 
     ForthVM.Core.Worker.spawn(worker_pid, 2)
-    ForthVM.Core.Worker.load(worker_pid, 2, "\"hello world\" puts")
+    ForthVM.Core.Worker.load(worker_pid, 2, "\"hello world\n\" puts")
     assert_receive {:command_stdout, "hello world\n", _encoding}, 1_000
   end
 end

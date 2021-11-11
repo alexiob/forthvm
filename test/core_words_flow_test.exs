@@ -19,7 +19,7 @@ defmodule ForthVM.ProcessWordFlowTest do
   test "divide by zero checker" do
     assert capture_io(fn -> process_run(~s[
     ( numerator denominator -- quotient )
-    : /check dup 0= if "invalid" puts drop else / then ;
+    : /check dup 0= if "invalid\n" puts drop else / then ;
     5 0 /check
     25 5 /check
     .
@@ -166,8 +166,8 @@ defmodule ForthVM.ProcessWordFlowTest do
       variable PIES 0 PIES !
       : BAKE-PIE 1 PIES +! ;
       : EAT-PIE PIES @
-        if -1 PIES +! "Thank you" puts
-        else "What pie?" puts
+        if -1 PIES +! "Thank you\n" puts
+        else "What pie?" . cr
         then
       ;
       variable FROZEN-PIES 0 FROZEN-PIES !

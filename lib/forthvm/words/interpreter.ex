@@ -13,20 +13,35 @@ defmodule ForthVM.Words.Interpreter do
   # Help
   # ---------------------------------------------
 
+  # documentation for words directly implemented into ForthVM.Process
+  @core_words %{
+    "if/else/than" =>
+      {:word, :core,
+       %{
+         stack: "( x -- )",
+         doc:
+           "if x is truthly execute words before than, if falsly and else is specified, execute code before else"
+       }}
+  }
+
   @doc """
   dictionary: ( -- ) ( -- ) print list of words in dictionary
   """
   def dictionary(tokens, data_stack, return_stack, dictionary, %{io: %{device: device}} = meta) do
+    full_dictionary = Map.merge(@core_words, dictionary)
+
+    IO.write(device, "Dictionary ([w] = word, [v] = variable, [c] = constant):")
+
     width =
-      Enum.max_by(Map.keys(dictionary), fn name ->
+      Enum.max_by(Map.keys(full_dictionary), fn name ->
         String.length(name)
       end)
       |> String.length()
 
-    Map.keys(dictionary)
+    Map.keys(full_dictionary)
     |> Enum.sort()
     |> Enum.each(fn name ->
-      Dictionary.print_word_doc(dictionary, device, name, width)
+      Dictionary.print_word_doc(full_dictionary, device, name, width)
     end)
 
     Process.next(tokens, data_stack, return_stack, dictionary, meta)

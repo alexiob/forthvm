@@ -311,8 +311,18 @@ defmodule ForthVM.Process do
         message = "undefined protocol '#{inspect(e.protocol)}' for value '#{inspect(e.value)}"
         error(message, {tokens, data_stack, return_stack, dictionary, meta}, device)
 
+      _e in MatchError ->
+        message = "invalid tokens or data stack"
+        error(message, {tokens, data_stack, return_stack, dictionary, meta}, device)
+
       e ->
-        error(e.message, {tokens, data_stack, return_stack, dictionary, meta}, device)
+        case e do
+          %{message: message} ->
+            error(message, {tokens, data_stack, return_stack, dictionary, meta}, device)
+
+          e ->
+            error(inspect(e), {tokens, data_stack, return_stack, dictionary, meta}, device)
+        end
     end
   end
 

@@ -16,7 +16,7 @@ defmodule ForthVM.Repl do
   end
 
   def loop() do
-    input = IO.gets(@prompt)
+    input = IO.gets(@prompt) |> String.trim()
 
     ForthVM.execute(@repl_core, @repl_process, input)
 

@@ -42,7 +42,7 @@ defmodule ForthVM.Words.IO do
   cr: ( -- ) emits a carriage return
   """
   def cr(tokens, data_stack, return_stack, dictionary, %{io: %{device: device}} = meta) do
-    IO.puts(device, "")
+    IO.write(device, "\n")
 
     Process.next(tokens, data_stack, return_stack, dictionary, meta)
   end
@@ -60,7 +60,7 @@ defmodule ForthVM.Words.IO do
   puts: ( x -- ) pops and prints the literal value on the top of the data_stack
   """
   def puts(tokens, [x | data_stack], return_stack, dictionary, %{io: %{device: device}} = meta) do
-    IO.puts(device, x)
+    IO.write(device, x)
 
     Process.next(tokens, data_stack, return_stack, dictionary, meta)
   end
