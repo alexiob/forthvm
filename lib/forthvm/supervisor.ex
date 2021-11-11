@@ -45,4 +45,8 @@ defmodule ForthVM.Supervisor do
   def spawn(core_id, process_id, dictionary \\ nil) do
     ForthVM.Core.Worker.spawn(core_pid(core_id), process_id, dictionary)
   end
+
+  def send_message(core_id, process_id, word_name, message_data) do
+    ForthVM.Core.Worker.send_message(core_pid(core_id), process_id, word_name, message_data)
+  end
 end

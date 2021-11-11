@@ -1,5 +1,6 @@
 defmodule ForthVM.Repl.Process do
   @moduledoc """
+  DEPRECATED - here just as a guideline on how to handle process state changes
   A single process REPL
   """
   alias ForthVM.Process
@@ -10,7 +11,7 @@ defmodule ForthVM.Repl.Process do
   @reductions 100
 
   def context() do
-    {[], [], [], Dictionary.new(), Process.new_meta()}
+    {[], [], [], Dictionary.new(), Process.new_meta(nil, nil)}
   end
 
   def run() do

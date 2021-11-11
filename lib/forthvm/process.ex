@@ -4,23 +4,25 @@ defmodule ForthVM.Process do
   """
   import ForthVM.Utils
 
-  defstruct id: nil, context: {}, status: nil, exit_value: nil
+  defstruct core_id: nil, id: nil, context: {}, status: nil, exit_value: nil
 
   # ---------------------------------------------
   # Custom guards
   # ---------------------------------------------
 
-  def new(id \\ nil, dictionary \\ nil) do
+  def new(core_id \\ nil, id \\ nil, dictionary \\ nil) do
     %__MODULE__{
       id: id || System.unique_integer(),
-      context: {[], [], [], dictionary || ForthVM.Dictionary.new(), new_meta()},
+      context: {[], [], [], dictionary || ForthVM.Dictionary.new(), new_meta(core_id, id)},
       status: nil,
       exit_value: nil
     }
   end
 
-  def new_meta() do
+  def new_meta(core_id, process_id) do
     %{
+      core_id: core_id,
+      process_id: process_id,
       reductions: 0,
       sleep: 0,
       debug: false,
@@ -29,7 +31,8 @@ defmodule ForthVM.Process do
         devices: %{
           "stdio" => :stdio
         }
-      }
+      },
+      messages: []
     }
   end
 
@@ -38,8 +41,8 @@ defmodule ForthVM.Process do
   # ---------------------------------------------
 
   # run program described by tokens, using the provided dictionary, for, at max, number of reductions
-  def run(tokens, %{} = dictionary, reductions) do
-    process(tokens, [], [], dictionary, %{new_meta() | reductions: reductions})
+  def run(tokens, %{} = dictionary, reductions, core_id \\ nil, process_id \\ nil) do
+    process(tokens, [], [], dictionary, %{new_meta(core_id, process_id) | reductions: reductions})
   end
 
   # run program defined in the provided context, for, at max, number of reductions
@@ -108,6 +111,20 @@ defmodule ForthVM.Process do
   # ---------------------------------------------
   # Process exit conditions
   # ---------------------------------------------
+
+  # no more tokens, but there are messages in the queue
+  def process([], data_stack, return_stack, dictionary, %{messages: messages} = meta)
+      when is_list(messages) and length(messages) > 0 do
+    {word_name, message_data} = hd(messages)
+
+    process(
+      [word_name],
+      message_data ++ data_stack,
+      return_stack,
+      dictionary,
+      %{meta | messages: tl(messages)}
+    )
+  end
 
   # no more tokens, one last value in the data stack
   def process([], [last_value] = data_stack, return_stack, dictionary, meta) do

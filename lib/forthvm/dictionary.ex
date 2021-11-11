@@ -43,7 +43,7 @@ defmodule ForthVM.Dictionary do
       ForthVM.Words.Logic,
       ForthVM.Words.Math,
       ForthVM.Words.Stack,
-      ForthVM.Words.String,
+      ForthVM.Words.Messages,
       ForthVM.Words.Data
     ]
 

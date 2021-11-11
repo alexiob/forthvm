@@ -67,6 +67,20 @@ defmodule ForthVM.Core do
     replace_process(core, process.id, process)
   end
 
+  def send_message(%__MODULE__{io: io} = core, process_id, word_name, message_data) do
+    case find_process(core, process_id) do
+      nil ->
+        IO.puts(io, "Can not send message #{word_name} to unknown process #{process_id}")
+        core
+
+      %{context: {tokens, data_stack, return_stack, dictionary, meta}} = process ->
+        meta = %{meta | messages: [{word_name, message_data} | meta.messages]}
+        process = %{process | context: {tokens, data_stack, return_stack, dictionary, meta}}
+
+        replace_process(core, process.id, process)
+    end
+  end
+
   # ---------------------------------------------
   # Processes
   # ---------------------------------------------
@@ -89,14 +103,14 @@ defmodule ForthVM.Core do
   end
 
   def spawn_process(
-        %__MODULE__{processes: processes, io: io} = core,
+        %__MODULE__{id: core_id, processes: processes, io: io} = core,
         process_id \\ nil,
         dictionary \\ nil
       ) do
     case find_process(core, process_id) do
       nil ->
         process =
-          Process.new(process_id, dictionary)
+          Process.new(core_id, process_id, dictionary)
           |> Process.add_io_device(@core_io_device_name, io)
           |> Process.set_io_device(@core_io_device_name)
 

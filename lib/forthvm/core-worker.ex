@@ -50,6 +50,10 @@ defmodule ForthVM.Core.Worker do
     GenServer.call(pid, {:load, process_id, source})
   end
 
+  def send_message(pid, process_id, word_name, message_data) do
+    GenServer.cast(pid, {:send_message, process_id, {word_name, message_data}})
+  end
+
   # ---------------------------------------------
   # API Handler
   # ---------------------------------------------
@@ -74,6 +78,13 @@ defmodule ForthVM.Core.Worker do
     core = ForthVM.Core.load(core, process_id, source)
 
     {:reply, core, core}
+  end
+
+  @impl true
+  def handle_cast({:send_message, process_id, {word_name, message_data}}, core) do
+    core = ForthVM.Core.send_message(core, process_id, word_name, message_data)
+
+    {:noreply, core}
   end
 
   @impl true

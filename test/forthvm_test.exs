@@ -5,7 +5,7 @@ defmodule ForthVMTest do
 
   test "greets the world" do
     assert capture_io(fn ->
-             {:ok, _pid} = ForthVM.start(num_cores: 2)
+             start_supervised({ForthVM.Supervisor, num_cores: 2})
 
              %ForthVM.Core{
                id: core_id,
