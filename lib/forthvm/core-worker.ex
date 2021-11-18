@@ -91,6 +91,9 @@ defmodule ForthVM.Core.Worker do
   def handle_info(:tick, core) do
     core = ForthVM.Core.run(core)
 
+    # TODO: instead of ticking, we should continue
+    # runnining all processes with statun not :exit
+    # but, this is a toy...
     tick()
 
     {:noreply, core}

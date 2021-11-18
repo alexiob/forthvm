@@ -30,7 +30,7 @@ defmodule ForthVM.Supervisor do
 
   def cores() do
     Supervisor.which_children(Process.whereis(ForthVM.Core.Supervisor))
-    |> Enum.map(fn {core_id, core_pid, _, _} -> {core_id, core_pid} end)
+    |> Enum.map(fn {core_id, core_pid, _, _} -> {Atom.to_string(core_id), core_pid} end)
     |> Enum.into(%{})
   end
 

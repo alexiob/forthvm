@@ -1,18 +1,55 @@
 # ForthVM: a toy
 
+[![Build Status](https://travis-ci.org/alexiob/forthvm.svg?branch=master)](https://travis-ci.org/alexiob/forthvm)
+[![Inline docs](http://inch-ci.org/github/alexiob/forthvm.svg)](http://inch-ci.org/github/alexiob/forthvm)
+[![Hex version](https://img.shields.io/hexpm/v/forthvm.svg)](https://hex.pm/packages/forthvm)
+[![Coverage Status](https://coveralls.io/repos/github/alexiob/forthvm/badge.svg?branch=master)](https://coveralls.io/github/alexiob/forthvm?branch=master)
+[![hex.pm downloads](https://img.shields.io/hexpm/dt/forthvm.svg)](https://hex.pm/packages/forthvm)
+
 Very simple Forth-like VM/Interpreter written in Elixir.
 
 I have written it to experiment implementing a stack-based preemtive multitasking interpreter (and to play) with Elixir.
 
-## Usage
+## Points of interest
 
-There is a VERY basic REPL, that can be started with `mix repl`.
+- ForthVM supports quoted strings like `"hello world" .`.
+- ForthVM supports multiple concurrent isolated cores (Elixir processes) running concurrent Forth processes.
+- ForthVM processes inside the same core can send messages to other processes and trigger execution of any defined word.
+- ForthVM captures stdio and send corresponding messages to all registered processes (example, for UI stuff).
+
+## Supervisor structure
 
 ```txt
-# mix repl
+ForthVM
+|- ForthVM.Supervisor: top-level supervisor. Only one of this can be started.
+  |- ForthVM.Registry: used to keep tab of core workers.
+  |- ForthVM.Subscriptions: used to subscribe to ForthVM events, like those from IOCapture.
+  |- ForthVM.IOCapture: collects all ForthVM outputs and dispatches to registered processes.
+  |- ForthVM.IOLogger: simple logger receiving messages from IOCapture.
+  |- ForthVM.Core.Supervisor: spawns Core workers, one for each Core.
+    |- ForthVM.Core.Worker: run ForthVM processes. Can spawn as many new processes as needed.
+    |- ...
+```
+
+## Usage
+
+The easiest way to play with it is to use the very bearbones REPL:
+
+```sh
+mix repl
+```
+
+And inside it:
+
+```txt
 ForthVM REPL (v0.5.0)
+>> 22 22 +
+>> .
+44
+>> .s
+>> s.
 >> dictionary
-Dictionary ([w] = word, [v] = variable, [c] = constant:
+Dictionary ([w] = word, [v] = variable, [c] = constant):
 [w] !               ( x name -- ) - store value in variable
 [w] &               ( x y -- v ) - bitwise and
 [w] (               ( -- ) - discard all tokens till ")" is fountd
@@ -105,18 +142,6 @@ Dictionary ([w] = word, [v] = variable, [c] = constant:
 [w] ~               ( x -- v ) - bitwise not
 ```
 
-## Structure
-
-ForthVM
-|- ForthVM.Supervisor
-  |- ForthVM.Registry: used to keep tab of core workers
-  |- ForthVM.Subscriptions: used to subscribe to ForthVM events, like those from IOCapture
-  |- ForthVM.IOCapture: collects all ForthVM outputs and dispatches to registered processes
-  |- ForthVM.IOLogger: simple logger receiving messages from IOCapture
-  |- ForthVM.Core.Supervisor: spawns Core workers
-    |- ForthVM.Core.Worker: run ForthVM processes
-    |- ...
-
 ## TODO:
 
 - [x] tokenizer
@@ -134,3 +159,6 @@ ForthVM
 - [ ] step-by-step debugger
 - [ ] real Forth: define and handled immediate words
 
+## License
+
+ForthVM is provided under the [MIT license](LICENSE)
