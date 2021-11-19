@@ -8,6 +8,14 @@ Very simple Forth-like VM/Interpreter written in Elixir.
 
 I have written it to experiment implementing a stack-based preemtive multitasking interpreter (and to play) with Elixir.
 
+## Install
+
+Use [hex.pm](https://hex.pm/packages/forthvm)
+
+## Documentation
+
+Check [hexdocs.pm](https://hexdocs.pm/forthvm/)
+
 ## Points of interest
 
 - ForthVM supports quoted strings like `"hello world" .`.
