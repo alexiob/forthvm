@@ -1,7 +1,6 @@
 # ForthVM: a toy
 
-[![Build Status](https://travis-ci.org/alexiob/forthvm.svg?branch=master)](https://travis-ci.org/alexiob/forthvm)
-[![Inline docs](http://inch-ci.org/github/alexiob/forthvm.svg)](http://inch-ci.org/github/alexiob/forthvm)
+[![Build Status](https://travis-ci.com/alexiob/forthvm.svg?branch=master)](https://travis-ci.com/alexiob/forthvm)
 [![Hex version](https://img.shields.io/hexpm/v/forthvm.svg)](https://hex.pm/packages/forthvm)
 [![Coverage Status](https://coveralls.io/repos/github/alexiob/forthvm/badge.svg?branch=master)](https://coveralls.io/github/alexiob/forthvm?branch=master)
 [![hex.pm downloads](https://img.shields.io/hexpm/dt/forthvm.svg)](https://hex.pm/packages/forthvm)
