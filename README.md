@@ -1,6 +1,6 @@
 # ForthVM: a toy
 
-[![Build status](https://github.com/alexiob/forthvm/actions/workflows/elixir/badge.svg)](https://github.com/alexiob/forthvm/actions)
+[![Build status](https://github.com/alexiob/forthvm/actions/workflows/elixir.yml/badge.svg)](https://github.com/alexiob/forthvm/actions)
 [![Hex version](https://img.shields.io/hexpm/v/forthvm.svg)](https://hex.pm/packages/forthvm)
 [![hex.pm downloads](https://img.shields.io/hexpm/dt/forthvm.svg)](https://hex.pm/packages/forthvm)
 
