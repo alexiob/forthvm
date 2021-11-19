@@ -1,8 +1,7 @@
 # ForthVM: a toy
 
-[![Build Status](https://travis-ci.com/alexiob/forthvm.svg?branch=master)](https://travis-ci.com/alexiob/forthvm)
+![example workflow](https://github.com/alexiob/forthvm/actions/workflows/elixir/badge.svg)
 [![Hex version](https://img.shields.io/hexpm/v/forthvm.svg)](https://hex.pm/packages/forthvm)
-[![Coverage Status](https://coveralls.io/repos/github/alexiob/forthvm/badge.svg?branch=master)](https://coveralls.io/github/alexiob/forthvm?branch=master)
 [![hex.pm downloads](https://img.shields.io/hexpm/dt/forthvm.svg)](https://hex.pm/packages/forthvm)
 
 Very simple Forth-like VM/Interpreter written in Elixir.
