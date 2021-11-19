@@ -8,9 +8,19 @@ Very simple Forth-like VM/Interpreter written in Elixir.
 
 I have written it to experiment implementing a stack-based preemtive multitasking interpreter (and to play) with Elixir.
 
-## Install
+## Installation
 
-Use [hex.pm](https://hex.pm/packages/forthvm)
+The package can be installed by adding `forthvm` to your list of dependencies in `mix.exs`:
+
+```elixir
+def deps do
+  [
+    {:forthvm, "~> 0.5.0"}
+  ]
+end
+```
+
+Or check [hex.pm](https://hex.pm/packages/forthvm)
 
 ## Documentation
 
